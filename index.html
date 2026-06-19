@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chaitanya Multi Speciality Hospital</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="#" class="logo">Chaitanya<span>Hospital</span></a>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#services">Services</a></li>
+                <li><a href="#doctors">Doctors</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+            <div style="display:flex;gap:10px;align-items:center;">
+                <a href="dashboard.html" class="btn" style="background:linear-gradient(135deg,#7c3aed,#2563eb);font-size:13px;">
+                    <i class="fa-solid fa-gauge" style="margin-right:6px;"></i>Admin Dashboard
+                </a>
+                <a href="#contact" class="btn">Book Appointment</a>
+            </div>
+            <div class="menu-toggle" id="mobile-menu">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <section id="home" class="hero">
+            <div class="container hero-container">
+                <div class="hero-content">
+                    <h1>Advanced Healthcare Made Personal</h1>
+                    <p>Providing world-class medical services with state-of-the-art facilities and a team of expert doctors.</p>
+                    <div class="hero-buttons">
+                        <a href="#doctors" class="btn btn-primary">Find a Doctor</a>
+                        <a href="#services" class="btn btn-outline">Our Services</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Section -->
+        <section class="stats reveal">
+            <div class="container stats-container">
+                <div class="stat-box">
+                    <h3>50+</h3>
+                    <p>Expert Doctors</p>
+                </div>
+                <div class="stat-box">
+                    <h3>20k+</h3>
+                    <p>Happy Patients</p>
+                </div>
+                <div class="stat-box">
+                    <h3>15+</h3>
+                    <p>Departments</p>
+                </div>
+                <div class="stat-box">
+                    <h3>24/7</h3>
+                    <p>Emergency Care</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="about section-padding reveal">
+            <div class="container about-container">
+                <div class="about-image">
+                    <img src="hospital_about_image.png" alt="Chaitanya Multi Speciality Hospital Building">
+                </div>
+                <div class="about-content">
+                    <h2 class="section-title">About Chaitanya Hospital</h2>
+                    <p>At Chaitanya Multi Speciality Hospital, we are dedicated to providing compassionate, high-quality, and affordable healthcare services. With a legacy of excellence spanning over two decades, our state-of-the-art facility is equipped with the latest medical technology.</p>
+                    <p>Our team of highly skilled doctors, nurses, and support staff work tirelessly to ensure the well-being of our patients. We believe in a holistic approach to healing, focusing on both physical and emotional health.</p>>
+                    <ul class="features-list">
+                        <li>Modern Technology & Equipment</li>
+                        <li>Experienced Medical Professionals</li>
+                        <li>Patient-Centric Approach</li>
+                        <li>Comprehensive Care Programs</li>
+                    </ul>
+                    <a href="#contact" class="btn btn-outline">Learn More</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Services Section -->
+        <section id="services" class="services section-padding bg-light reveal">
+            <div class="container">
+                <div class="section-header text-center">
+                    <h2 class="section-title">Our Departments</h2>
+                    <p>We offer a wide range of specialized medical services to cater to your health needs.</p>
+                </div>
+                <div class="services-grid">
+                    <div class="service-card">
+                        <div class="service-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+                        <h3>Cardiology</h3>
+                        <p>Comprehensive care for heart-related conditions with advanced diagnostics and treatments.</p>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-icon"><i class="fa-solid fa-brain"></i></div>
+                        <h3>Neurology</h3>
+                        <p>Expert diagnosis and management of disorders affecting the brain and nervous system.</p>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-icon"><i class="fa-solid fa-baby"></i></div>
+                        <h3>Pediatrics</h3>
+                        <p>Specialized healthcare services tailored for infants, children, and adolescents.</p>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-icon"><i class="fa-solid fa-bone"></i></div>
+                        <h3>Orthopedics</h3>
+                        <p>Advanced treatment for bone, joint, and muscle conditions, including surgeries and rehab.</p>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-icon"><i class="fa-solid fa-eye"></i></div>
+                        <h3>Ophthalmology</h3>
+                        <p>Complete eye care services ranging from routine exams to complex surgical procedures.</p>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-icon"><i class="fa-solid fa-tooth"></i></div>
+                        <h3>Dentistry</h3>
+                        <p>Preventive, restorative, and cosmetic dental services for a healthy smile.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Doctors Section -->
+        <section id="doctors" class="doctors section-padding reveal">
+            <div class="container">
+                <div class="section-header text-center">
+                    <h2 class="section-title">Our Expert Doctors</h2>
+                    <p>Meet our team of dedicated medical professionals.</p>
+                    
+                    <!-- Filter Buttons -->
+                    <div class="doctor-filters">
+                        <button class="filter-btn active" data-filter="all">All</button>
+                        <button class="filter-btn" data-filter="cardiology">Cardiology</button>
+                        <button class="filter-btn" data-filter="neurology">Neurology</button>
+                        <button class="filter-btn" data-filter="pediatrics">Pediatrics</button>
+                    </div>
+                </div>
+
+                <div class="doctors-grid" id="doctors-grid">
+                    <!-- Doctor Cards will be populated by JS for interactivity -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact & Booking Section -->
+        <section id="contact" class="contact section-padding bg-light reveal">
+            <div class="container contact-container">
+                <div class="contact-info">
+                    <h2 class="section-title">Get in Touch</h2>
+                    <p>We are here to help and answer any questions you might have. We look forward to hearing from you.</p>
+                    <div class="info-item">
+                        <div class="info-icon"><i class="fa-solid fa-location-dot"></i></div>
+                        <div>
+                            <h4>Location</h4>
+                            <p>123 Health Avenue, Medical City, HC 45678</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon"><i class="fa-solid fa-phone"></i></div>
+                        <div>
+                            <h4>Emergency Contact</h4>
+                            <p>+1 234 567 8900 (24/7)</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon"><i class="fa-solid fa-envelope"></i></div>
+                        <div>
+                            <h4>Email Address</h4>
+                            <p>info@chaitanyahospital.com</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="booking-form-wrapper">
+                    <form id="booking-form" class="booking-form">
+                        <h3>Book an Appointment</h3>
+                        <div class="form-group">
+                            <label for="name">Full Name</label>
+                            <input type="text" id="name" required placeholder="John Doe">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" required placeholder="john@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="department">Department</label>
+                            <select id="department" required>
+                                <option value="" disabled selected>Select a Department</option>
+                                <option value="cardiology">Cardiology</option>
+                                <option value="neurology">Neurology</option>
+                                <option value="pediatrics">Pediatrics</option>
+                                <option value="general">General Checkup</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="date">Preferred Date</label>
+                            <input type="date" id="date" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Confirm Booking</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-container">
+            <div class="footer-col">
+                <h3>Chaitanya Hospital</h3>
+                <p>Leading the way in medical excellence, trusted care, and advanced technology.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#about">About Us</a></li>
+                    <li><a href="#services">Services</a></li>
+                    <li><a href="#doctors">Doctors</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Contact Us</h4>
+                <p>123 Health Avenue, Medical City</p>
+                <p>Phone: +1 234 567 8900</p>
+                <p>Email: info@chaitanyahospital.com</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Chaitanya Multi Speciality Hospital. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
