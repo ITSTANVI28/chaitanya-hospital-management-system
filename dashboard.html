@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Chaitanya Multi Speciality Hospital</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Barcode Scanner Library -->
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i class="fa-solid fa-hospital"></i>
+                <div>
+                    <span class="logo-title">Chaitanya</span>
+                    <span class="logo-subtitle">Hospital Admin</span>
+                </div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <p class="nav-label">Main Menu</p>
+            <ul>
+                <li>
+                    <a href="#" class="nav-item active" data-tab="overview">
+                        <i class="fa-solid fa-chart-pie"></i>
+                        <span>Overview</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-item" data-tab="patients">
+                        <i class="fa-solid fa-bed-pulse"></i>
+                        <span>Patient & Bed Mgmt</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-item" data-tab="waste">
+                        <i class="fa-solid fa-trash-can"></i>
+                        <span>Waste Management</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-item" data-tab="stock">
+                        <i class="fa-solid fa-boxes-stacked"></i>
+                        <span>Stock Management</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-item" data-tab="staff">
+                        <i class="fa-solid fa-user-nurse"></i>
+                        <span>Staff Info</span>
+                    </a>
+                </li>
+            </ul>
+
+            <p class="nav-label" style="margin-top:20px;">General</p>
+            <ul>
+                <li>
+                    <a href="index.html" class="nav-item">
+                        <i class="fa-solid fa-globe"></i>
+                        <span>Back to Website</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Topbar -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="menu-toggle-btn" id="menuToggleBtn">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <h1 class="page-title" id="pageTitle">Overview</h1>
+            </div>
+            <div class="topbar-right">
+                <div class="notification-bell">
+                    <i class="fa-solid fa-bell"></i>
+                    <span class="badge" id="alertBadge">3</span>
+                </div>
+                <div class="admin-profile">
+                    <div class="admin-avatar"><i class="fa-solid fa-user-shield"></i></div>
+                    <div>
+                        <span class="admin-name">Admin</span>
+                        <span class="admin-role">Hospital Manager</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Tab Panels -->
+        <div class="content-area">
+
+            <!-- ===== OVERVIEW TAB ===== -->
+            <div class="tab-panel active" id="tab-overview">
+                <div class="summary-cards">
+                    <div class="summary-card blue">
+                        <div class="card-icon"><i class="fa-solid fa-bed-pulse"></i></div>
+                        <div class="card-info">
+                            <h3 id="overview-total-beds">48</h3>
+                            <p>Total Beds</p>
+                        </div>
+                    </div>
+                    <div class="summary-card green">
+                        <div class="card-icon"><i class="fa-solid fa-circle-check"></i></div>
+                        <div class="card-info">
+                            <h3 id="overview-available-beds">14</h3>
+                            <p>Available Beds</p>
+                        </div>
+                    </div>
+                    <div class="summary-card orange">
+                        <div class="card-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <div class="card-info">
+                            <h3 id="overview-stock-alerts">3</h3>
+                            <p>Stock Alerts</p>
+                        </div>
+                    </div>
+                    <div class="summary-card purple">
+                        <div class="card-icon"><i class="fa-solid fa-users"></i></div>
+                        <div class="card-info">
+                            <h3 id="overview-total-staff">52</h3>
+                            <p>Total Staff</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="overview-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2><i class="fa-solid fa-triangle-exclamation"></i> Urgent Stock Alerts</h2>
+                        </div>
+                        <div id="overview-alerts-list"></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2><i class="fa-solid fa-trash-can"></i> Today's Waste Summary</h2>
+                        </div>
+                        <div class="waste-summary-list">
+                            <div class="waste-bar-item">
+                                <span>Biomedical Waste</span>
+                                <div class="bar-wrap"><div class="bar" id="overview-waste-bar-biomedical" style="width:65%; background:#ef4444;"></div></div>
+                                <span id="overview-waste-text-biomedical">32.5 kg</span>
+                            </div>
+                            <div class="waste-bar-item">
+                                <span>Sharps Waste</span>
+                                <div class="bar-wrap"><div class="bar" id="overview-waste-bar-sharps" style="width:20%; background:#f97316;"></div></div>
+                                <span id="overview-waste-text-sharps">10 kg</span>
+                            </div>
+                            <div class="waste-bar-item">
+                                <span>General Waste</span>
+                                <div class="bar-wrap"><div class="bar" id="overview-waste-bar-general" style="width:90%; background:#64748b;"></div></div>
+                                <span id="overview-waste-text-general">45 kg</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== PATIENT & BED MANAGEMENT TAB ===== -->
+            <div class="tab-panel" id="tab-patients">
+                <div class="summary-cards">
+                    <div class="summary-card blue">
+                        <div class="card-icon"><i class="fa-solid fa-bed-pulse"></i></div>
+                        <div class="card-info"><h3 id="patient-total-beds">48</h3><p>Total Beds</p></div>
+                    </div>
+                    <div class="summary-card red">
+                        <div class="card-icon"><i class="fa-solid fa-bed"></i></div>
+                        <div class="card-info"><h3 id="patient-occupied-beds">34</h3><p>Occupied Beds</p></div>
+                    </div>
+                    <div class="summary-card green">
+                        <div class="card-icon"><i class="fa-solid fa-circle-check"></i></div>
+                        <div class="card-info"><h3 id="patient-available-beds">14</h3><p>Available Beds</p></div>
+                    </div>
+                    <div class="summary-card orange">
+                        <div class="card-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                        <div class="card-info"><h3 id="patient-discharges-today">5</h3><p>Discharges Today</p></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fa-solid fa-bed-pulse"></i> Patient & Bed Status</h2>
+                        <div class="filter-group">
+                            <input type="text" id="patient-search" class="search-input" placeholder="Search patient or bed...">
+                            <select class="filter-select" id="ward-filter">
+                                <option value="all">All Wards</option>
+                                <option value="General">General</option>
+                                <option value="ICU">ICU</option>
+                                <option value="Pediatric">Pediatric</option>
+                                <option value="Maternity">Maternity</option>
+                                <option value="Orthopedic">Orthopedic</option>
+                            </select>
+                            <button class="btn-add" onclick="openModal('modal-patient')"><i class="fa-solid fa-plus"></i> Add Patient</button>
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table class="data-table" id="patients-table">
+                            <thead>
+                                <tr>
+                                    <th>Patient Name</th>
+                                    <th>Age</th>
+                                    <th>Ward</th>
+                                    <th>Bed No.</th>
+                                    <th>Admission Date</th>
+                                    <th>Doctor</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="patients-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== WASTE MANAGEMENT TAB ===== -->
+            <div class="tab-panel" id="tab-waste">
+                <div class="summary-cards">
+                    <div class="summary-card red">
+                        <div class="card-icon"><i class="fa-solid fa-biohazard"></i></div>
+                        <div class="card-info"><h3 id="waste-biomedical-today">32.5 kg</h3><p>Biomedical Today</p></div>
+                    </div>
+                    <div class="summary-card orange">
+                        <div class="card-icon"><i class="fa-solid fa-syringe"></i></div>
+                        <div class="card-info"><h3 id="waste-sharps-today">10 kg</h3><p>Sharps Today</p></div>
+                    </div>
+                    <div class="summary-card blue">
+                        <div class="card-icon"><i class="fa-solid fa-recycle"></i></div>
+                        <div class="card-info"><h3 id="waste-general-today">45 kg</h3><p>General Today</p></div>
+                    </div>
+                    <div class="summary-card green">
+                        <div class="card-icon"><i class="fa-solid fa-circle-check"></i></div>
+                        <div class="card-info"><h3 id="waste-total-today">87.5 kg</h3><p>Total Today</p></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fa-solid fa-trash-can"></i> Waste Log</h2>
+                        <div class="filter-group">
+                            <select class="filter-select" id="waste-filter">
+                                <option value="all">All Types</option>
+                                <option value="Biomedical">Biomedical</option>
+                                <option value="Sharps">Sharps</option>
+                                <option value="General">General</option>
+                            </select>
+                            <button class="btn-add" onclick="openModal('modal-waste')"><i class="fa-solid fa-plus"></i> Add Entry</button>
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table class="data-table" id="waste-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Waste Type</th>
+                                    <th>Department</th>
+                                    <th>Weight (kg)</th>
+                                    <th>Disposal Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="waste-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== STOCK MANAGEMENT TAB ===== -->
+            <div class="tab-panel" id="tab-stock">
+                <div class="summary-cards">
+                    <div class="summary-card blue">
+                        <div class="card-icon"><i class="fa-solid fa-boxes-stacked"></i></div>
+                        <div class="card-info"><h3 id="total-items-count">0</h3><p>Total Items</p></div>
+                    </div>
+                    <div class="summary-card red">
+                        <div class="card-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <div class="card-info"><h3 id="low-stock-count">0</h3><p>Low Stock Alerts</p></div>
+                    </div>
+                    <div class="summary-card green">
+                        <div class="card-icon"><i class="fa-solid fa-circle-check"></i></div>
+                        <div class="card-info"><h3 id="ok-stock-count">0</h3><p>Items OK</p></div>
+                    </div>
+                    <div class="summary-card orange">
+                        <div class="card-icon"><i class="fa-solid fa-clock"></i></div>
+                        <div class="card-info"><h3>2</h3><p>Pending Orders</p></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fa-solid fa-boxes-stacked"></i> Inventory Register</h2>
+                        <div class="filter-group">
+                            <input type="text" id="stock-search" class="search-input" placeholder="Search item...">
+                            <select class="filter-select" id="stock-filter">
+                                <option value="all">All Categories</option>
+                                <option value="Medicines">Medicines</option>
+                                <option value="Equipment">Equipment</option>
+                                <option value="Consumables">Consumables</option>
+                                <option value="Lab Supplies">Lab Supplies</option>
+                            </select>
+                            <button class="btn-add" onclick="openModal('modal-stock')"><i class="fa-solid fa-plus"></i> Add Item</button>
+                            <button class="btn-scan" onclick="openScannerModal()"><i class="fa-solid fa-barcode"></i> Scan Barcode</button>
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table class="data-table" id="stock-table">
+                            <thead>
+                                <tr>
+                                    <th>Medicine Name</th>
+                                    <th>Batch No.</th>
+                                    <th>Category</th>
+                                    <th>Qty Available</th>
+                                    <th>Unit</th>
+                                    <th>Expiry</th>
+                                    <th>Supplier</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stock-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== STAFF INFO TAB ===== -->
+            <div class="tab-panel" id="tab-staff">
+                <div class="summary-cards">
+                    <div class="summary-card blue">
+                        <div class="card-icon"><i class="fa-solid fa-user-doctor"></i></div>
+                        <div class="card-info"><h3 id="staff-doctors-count">18</h3><p>Doctors</p></div>
+                    </div>
+                    <div class="summary-card green">
+                        <div class="card-icon"><i class="fa-solid fa-user-nurse"></i></div>
+                        <div class="card-info"><h3 id="staff-nurses-count">24</h3><p>Nurses</p></div>
+                    </div>
+                    <div class="summary-card purple">
+                        <div class="card-icon"><i class="fa-solid fa-flask"></i></div>
+                        <div class="card-info"><h3 id="staff-techs-count">6</h3><p>Lab Technicians</p></div>
+                    </div>
+                    <div class="summary-card orange">
+                        <div class="card-icon"><i class="fa-solid fa-broom"></i></div>
+                        <div class="card-info"><h3 id="staff-support-count">14</h3><p>Support Staff</p></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fa-solid fa-users"></i> Staff Directory</h2>
+                        <div class="filter-group">
+                            <input type="text" id="staff-search" class="search-input" placeholder="Search staff name...">
+                            <select class="filter-select" id="staff-filter">
+                                <option value="all">All Roles</option>
+                                <option value="Doctor">Doctor</option>
+                                <option value="Nurse">Nurse</option>
+                                <option value="Lab Technician">Lab Technician</option>
+                                <option value="Support Staff">Support Staff</option>
+                            </select>
+                            <button class="btn-add" onclick="openModal('modal-staff')"><i class="fa-solid fa-plus"></i> Add Staff</button>
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table class="data-table" id="staff-table">
+                            <thead>
+                                <tr>
+                                    <th>Staff Name</th>
+                                    <th>Role</th>
+                                    <th>Department</th>
+                                    <th>Shift</th>
+                                    <th>Contact</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="staff-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- end content-area -->
+    </main>
+
+    <!-- ===== MODAL: ADD PATIENT ===== -->
+    <div class="modal-overlay" id="modal-patient" onclick="closeOnOverlay(event, 'modal-patient')">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-bed-pulse"></i> Add New Patient</h3>
+                <button class="modal-close" onclick="closeModal('modal-patient')">&times;</button>
+            </div>
+            <form class="modal-form" id="form-patient">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Patient Name *</label>
+                        <input type="text" id="p-name" placeholder="Full Name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Age *</label>
+                        <input type="number" id="p-age" placeholder="Age" min="0" max="130" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Ward *</label>
+                        <select id="p-ward" required>
+                            <option value="">Select Ward</option>
+                            <option>General</option>
+                            <option>ICU</option>
+                            <option>Pediatric</option>
+                            <option>Maternity</option>
+                            <option>Orthopedic</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Bed Number *</label>
+                        <input type="text" id="p-bed" placeholder="e.g. G-12" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Doctor *</label>
+                        <select id="p-doctor" required>
+                            <option value="">Select Doctor</option>
+                            <option>Dr. Sarah Johnson</option>
+                            <option>Dr. Michael Chen</option>
+                            <option>Dr. Emily Davis</option>
+                            <option>Dr. Robert Smith</option>
+                            <option>Dr. Lisa Wong</option>
+                            <option>Dr. James Wilson</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Status *</label>
+                        <select id="p-status" required>
+                            <option value="">Select Status</option>
+                            <option>Stable</option>
+                            <option>Critical</option>
+                            <option>Post-Op</option>
+                            <option>Discharge</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Admission Date *</label>
+                    <input type="date" id="p-date" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal('modal-patient')">Cancel</button>
+                    <button type="submit" class="btn-save"><i class="fa-solid fa-check"></i> Save Patient</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== MODAL: ADD WASTE ===== -->
+    <div class="modal-overlay" id="modal-waste" onclick="closeOnOverlay(event, 'modal-waste')">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-trash-can"></i> Add Waste Entry</h3>
+                <button class="modal-close" onclick="closeModal('modal-waste')">&times;</button>
+            </div>
+            <form class="modal-form" id="form-waste">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Waste Type *</label>
+                        <select id="w-type" required>
+                            <option value="">Select Type</option>
+                            <option>Biomedical</option>
+                            <option>Sharps</option>
+                            <option>General</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Department *</label>
+                        <input type="text" id="w-dept" placeholder="e.g. ICU, OT" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Weight (kg) *</label>
+                        <input type="number" id="w-weight" placeholder="e.g. 5.5" step="0.1" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Date *</label>
+                        <input type="date" id="w-date" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Disposal Status *</label>
+                    <select id="w-status" required>
+                        <option value="">Select Status</option>
+                        <option>Disposed</option>
+                        <option>Pending</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal('modal-waste')">Cancel</button>
+                    <button type="submit" class="btn-save"><i class="fa-solid fa-check"></i> Save Entry</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== MODAL: ADD STOCK ===== -->
+    <div class="modal-overlay" id="modal-stock" onclick="closeOnOverlay(event, 'modal-stock')">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-boxes-stacked"></i> Add Stock Item</h3>
+                <button class="modal-close" onclick="closeModal('modal-stock')">&times;</button>
+            </div>
+            <form class="modal-form" id="form-stock">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Medicine Name *</label>
+                        <input type="text" id="s-name" placeholder="e.g. Paracetamol 500mg" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Batch Number *</label>
+                        <input type="text" id="s-batch" placeholder="e.g. B12345" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Category *</label>
+                        <select id="s-category" required>
+                            <option value="">Select Category</option>
+                            <option>Medicines</option>
+                            <option>Equipment</option>
+                            <option>Consumables</option>
+                            <option>Lab Supplies</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Unit *</label>
+                        <input type="text" id="s-unit" placeholder="e.g. Tablets, Pcs, Bottles" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Quantity Available *</label>
+                        <input type="number" id="s-qty" placeholder="Current stock" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Minimum Threshold *</label>
+                        <input type="number" id="s-min" placeholder="Alert below this" min="0" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Purchase Date *</label>
+                        <input type="date" id="s-purchase-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Expiry Date *</label>
+                        <input type="date" id="s-expiry-date" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Supplier Name *</label>
+                    <input type="text" id="s-supplier" placeholder="e.g. PharmaCorp" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal('modal-stock')">Cancel</button>
+                    <button type="submit" class="btn-save"><i class="fa-solid fa-check"></i> Save Item</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== MODAL: ADD STAFF ===== -->
+    <div class="modal-overlay" id="modal-staff" onclick="closeOnOverlay(event, 'modal-staff')">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-user-plus"></i> Add Staff Member</h3>
+                <button class="modal-close" onclick="closeModal('modal-staff')">&times;</button>
+            </div>
+            <form class="modal-form" id="form-staff">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Full Name *</label>
+                        <input type="text" id="st-name" placeholder="e.g. Dr. Pranav Sharma" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Role *</label>
+                        <select id="st-role" required>
+                            <option value="">Select Role</option>
+                            <option>Doctor</option>
+                            <option>Nurse</option>
+                            <option>Lab Technician</option>
+                            <option>Support Staff</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Department *</label>
+                        <input type="text" id="st-dept" placeholder="e.g. Cardiology" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Shift *</label>
+                        <select id="st-shift" required>
+                            <option value="">Select Shift</option>
+                            <option>Morning</option>
+                            <option>Evening</option>
+                            <option>Night</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Contact Number *</label>
+                        <input type="text" id="st-contact" placeholder="+91 98765 XXXXX" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Status *</label>
+                        <select id="st-status" required>
+                            <option value="">Select Status</option>
+                            <option>On Duty</option>
+                            <option>Off Duty</option>
+                            <option>On Leave</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal('modal-staff')">Cancel</button>
+                    <button type="submit" class="btn-save"><i class="fa-solid fa-check"></i> Save Staff</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== MODAL: BARCODE SCANNER ===== -->
+    <div class="modal-overlay" id="modal-scanner" onclick="closeOnOverlay(event, 'modal-scanner')">
+        <div class="modal-box scanner-modal-box">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-barcode"></i> Scan Medicine Barcode</h3>
+                <button class="modal-close" onclick="closeModal('modal-scanner')">&times;</button>
+            </div>
+            <div class="scanner-body">
+
+                <!-- Live Camera Scanner -->
+                <div class="scan-method">
+                    <p class="scan-method-label"><i class="fa-solid fa-camera"></i> Live Camera Scan (localhost वर काम करतो)</p>
+                    <div id="scanner-preview"></div>
+                    <button class="btn-scan" id="btn-start-cam" onclick="startLiveCamera()" style="width:100%;justify-content:center;margin-top:8px;">
+                        <i class="fa-solid fa-video"></i> Live Camera सुरू करा
+                    </button>
+                    <button class="btn-cancel" id="btn-stop-cam" onclick="stopLiveCamera()" style="width:100%;justify-content:center;margin-top:6px;display:none;">
+                        <i class="fa-solid fa-stop"></i> Camera बंद करा
+                    </button>
+                </div>
+
+                <!-- OR -->
+                <div class="scan-or"><span>किंवा</span></div>
+
+                <!-- Photo Capture -->
+                <div class="scan-method">
+                    <p class="scan-method-label"><i class="fa-solid fa-image"></i> Photo काढून / Upload करून Scan करा</p>
+                    <div style="display:flex;gap:10px;">
+                        <label class="camera-capture-btn" for="camera-input" style="flex:1;padding:14px 10px;">
+                            <i class="fa-solid fa-camera"></i>
+                            <span style="font-size:13px;">Camera Photo</span>
+                        </label>
+                        <label class="camera-capture-btn upload-btn" for="image-upload-input" style="flex:1;padding:14px 10px;">
+                            <i class="fa-solid fa-upload"></i>
+                            <span style="font-size:13px;">Gallery Upload</span>
+                        </label>
+                    </div>
+                    <input type="file" id="camera-input" accept="image/*" capture="environment" style="display:none;">
+                    <input type="file" id="image-upload-input" accept="image/*" style="display:none;">
+                </div>
+
+                <!-- OR -->
+                <div class="scan-or"><span>किंवा</span></div>
+
+                <!-- Manual -->
+                <div class="scan-method">
+                    <p class="scan-method-label"><i class="fa-solid fa-keyboard"></i> Manual Barcode Entry</p>
+                    <div class="manual-row">
+                        <input type="text" id="manual-barcode" placeholder="13 digit barcode number..." class="search-input">
+                        <button class="btn-add" onclick="lookupBarcode(document.getElementById('manual-barcode').value)">
+                            <i class="fa-solid fa-magnifying-glass"></i> Lookup
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Processing -->
+                <div id="scanner-processing" style="display:none;" class="scanner-processing">
+                    <i class="fa-solid fa-spinner fa-spin"></i> Barcode detect करत आहे...
+                </div>
+
+                <!-- Result -->
+                <div class="scanner-result" id="scanner-result" style="display:none; flex-direction: column; align-items: stretch; text-align: left; gap: 10px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div class="result-icon" id="result-icon"><i class="fa-solid fa-circle-check"></i></div>
+                        <div class="result-info">
+                            <p id="result-name" style="margin-bottom: 2px;">Medicine Name</p>
+                            <span id="result-barcode">Barcode: —</span>
+                        </div>
+                    </div>
+                    <div class="scanned-details" style="font-size: 13px; color: #475569; background: #f8fafc; padding: 10px; border-radius: 8px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                            <div><strong>Category:</strong> <span id="result-category">—</span></div>
+                            <div><strong>Unit:</strong> <span id="result-unit">—</span></div>
+                            <div><strong>Batch:</strong> <span id="result-batch">—</span></div>
+                            <div><strong>Expiry:</strong> <span id="result-expiry">—</span></div>
+                            <div style="grid-column: span 2;"><strong>Supplier:</strong> <span id="result-supplier">—</span></div>
+                        </div>
+                    </div>
+                    <button class="btn-save" onclick="useScannedResult()" style="width: 100%; justify-content: center;">
+                        <i class="fa-solid fa-arrow-right"></i> Use This
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden canvas for html5QrCode file scanning -->
+    <div id="qr-hidden-canvas" style="display:none;"></div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"><i class="fa-solid fa-circle-check"></i> <span id="toast-msg">Saved!</span></div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>
