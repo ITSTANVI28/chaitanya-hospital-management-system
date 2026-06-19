@@ -11,6 +11,7 @@ if (!$input) {
 $name = isset($input['name']) ? trim($input['name']) : '';
 $email = isset($input['email']) ? trim($input['email']) : '';
 $department = isset($input['department']) ? trim($input['department']) : '';
+$doctor_name = isset($input['doctor_name']) ? trim($input['doctor_name']) : '';
 $booking_date = isset($input['date']) ? trim($input['date']) : '';
 
 if (empty($name) || empty($email) || empty($department) || empty($booking_date)) {
@@ -20,8 +21,8 @@ if (empty($name) || empty($email) || empty($department) || empty($booking_date))
 }
 
 try {
-    $stmt = $pdo->prepare('INSERT INTO appointments (name, email, department, booking_date) VALUES (?, ?, ?, ?)');
-    $stmt->execute([$name, $email, $department, $booking_date]);
+    $stmt = $pdo->prepare('INSERT INTO appointments (name, email, department, doctor_name, booking_date) VALUES (?, ?, ?, ?, ?)');
+    $stmt->execute([$name, $email, $department, $doctor_name ?: null, $booking_date]);
     echo json_encode(['success' => true, 'message' => 'Appointment booked successfully']);
 } catch (\PDOException $e) {
     http_response_code(500);

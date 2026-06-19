@@ -34,6 +34,12 @@
                     </a>
                 </li>
                 <li>
+                    <a href="#" class="nav-item" data-tab="appointments">
+                        <i class="fa-regular fa-calendar-check"></i>
+                        <span>Appointments</span>
+                    </a>
+                </li>
+                <li>
                     <a href="#" class="nav-item" data-tab="patients">
                         <i class="fa-solid fa-bed-pulse"></i>
                         <span>Patient & Bed Mgmt</span>
@@ -161,6 +167,55 @@
                                 <span id="overview-waste-text-general">45 kg</span>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== APPOINTMENTS TAB ===== -->
+            <div class="tab-panel" id="tab-appointments">
+                <div class="summary-cards">
+                    <div class="summary-card purple">
+                        <div class="card-icon"><i class="fa-regular fa-calendar-check"></i></div>
+                        <div class="card-info"><h3 id="apt-total-today">0</h3><p>Today's Appointments</p></div>
+                    </div>
+                    <div class="summary-card blue">
+                        <div class="card-icon"><i class="fa-solid fa-list-check"></i></div>
+                        <div class="card-info"><h3 id="apt-total-pending">0</h3><p>Pending Appointments</p></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fa-regular fa-calendar-check"></i> Appointments List</h2>
+                        <div class="filter-group">
+                            <input type="date" id="apt-date-filter" class="search-input">
+                            <select class="filter-select" id="apt-doctor-filter">
+                                <option value="all">All Doctors</option>
+                                <!-- Populated dynamically -->
+                            </select>
+                            <select class="filter-select" id="apt-status-filter">
+                                <option value="all">All Status</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Checked In">Checked In</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table class="data-table" id="appointments-table">
+                            <thead>
+                                <tr>
+                                    <th>Patient Name</th>
+                                    <th>Email</th>
+                                    <th>Department</th>
+                                    <th>Doctor</th>
+                                    <th>Booking Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="appointments-tbody"></tbody>
+                        </table>
                     </div>
                 </div>
             </div>

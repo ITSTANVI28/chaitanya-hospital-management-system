@@ -7,6 +7,7 @@ let patientsData = [];
 let wasteData = [];
 let stockData = [];
 let staffData = [];
+let appointmentsData = [];
 
 async function fetchAllData() {
     try {
@@ -65,8 +66,95 @@ async function fetchAllData() {
         renderStaff(staffData);
         updateStaffStats();
     } catch (e) { 
-        console.error('Error fetching staff:', e); 
-        renderStaff([]);
+        console.warn('Backend not found, loading mock staff data for demo.');
+        staffData = [
+            // ===== 18 DOCTORS =====
+            { id: 1,  name: 'Dr. Sarah Johnson',       role: 'Doctor', dept: 'Cardiology',     shift: 'Morning', contact: '+91 98765 43210', status: 'On Duty' },
+            { id: 2,  name: 'Dr. Michael Chen',         role: 'Doctor', dept: 'Neurology',      shift: 'Morning', contact: '+91 98765 43211', status: 'On Duty' },
+            { id: 3,  name: 'Dr. Emily Davis',          role: 'Doctor', dept: 'Pediatrics',     shift: 'Morning', contact: '+91 98765 43212', status: 'On Duty' },
+            { id: 4,  name: 'Dr. Robert Smith',         role: 'Doctor', dept: 'Cardiology',     shift: 'Evening', contact: '+91 98765 43213', status: 'On Duty' },
+            { id: 5,  name: 'Dr. Lisa Wong',            role: 'Doctor', dept: 'Neurology',      shift: 'Evening', contact: '+91 98765 43214', status: 'On Duty' },
+            { id: 6,  name: 'Dr. James Wilson',         role: 'Doctor', dept: 'Pediatrics',     shift: 'Evening', contact: '+91 98765 43215', status: 'On Duty' },
+            { id: 7,  name: 'Dr. Pranav Sharma',        role: 'Doctor', dept: 'Orthopedics',    shift: 'Morning', contact: '+91 98234 56701', status: 'On Duty' },
+            { id: 8,  name: 'Dr. Anjali Deshmukh',      role: 'Doctor', dept: 'Ophthalmology',  shift: 'Morning', contact: '+91 98234 56702', status: 'On Duty' },
+            { id: 9,  name: 'Dr. Vikram Patil',         role: 'Doctor', dept: 'General Medicine',shift: 'Morning', contact: '+91 98234 56703', status: 'On Duty' },
+            { id: 10, name: 'Dr. Neha Kulkarni',        role: 'Doctor', dept: 'Dermatology',    shift: 'Morning', contact: '+91 98234 56704', status: 'On Duty' },
+            { id: 11, name: 'Dr. Rajesh Joshi',         role: 'Doctor', dept: 'ENT',            shift: 'Evening', contact: '+91 98234 56705', status: 'On Duty' },
+            { id: 12, name: 'Dr. Sneha Bhosale',        role: 'Doctor', dept: 'Gynecology',     shift: 'Morning', contact: '+91 98234 56706', status: 'On Leave' },
+            { id: 13, name: 'Dr. Amol Jadhav',          role: 'Doctor', dept: 'Orthopedics',    shift: 'Night',   contact: '+91 98234 56707', status: 'On Duty' },
+            { id: 14, name: 'Dr. Pooja Rane',           role: 'Doctor', dept: 'Pediatrics',     shift: 'Night',   contact: '+91 98234 56708', status: 'On Duty' },
+            { id: 15, name: 'Dr. Suresh Mehta',         role: 'Doctor', dept: 'General Medicine',shift: 'Evening', contact: '+91 98234 56709', status: 'On Duty' },
+            { id: 16, name: 'Dr. Kavita Nair',          role: 'Doctor', dept: 'Cardiology',     shift: 'Night',   contact: '+91 98234 56710', status: 'On Duty' },
+            { id: 17, name: 'Dr. Arun Shinde',          role: 'Doctor', dept: 'Neurology',      shift: 'Night',   contact: '+91 98234 56711', status: 'Off Duty' },
+            { id: 18, name: 'Dr. Manisha Gaikwad',      role: 'Doctor', dept: 'Dentistry',      shift: 'Morning', contact: '+91 98234 56712', status: 'On Duty' },
+
+            // ===== 24 NURSES =====
+            { id: 19, name: 'Priya Pawar',              role: 'Nurse', dept: 'Cardiology',      shift: 'Morning', contact: '+91 97654 32101', status: 'On Duty' },
+            { id: 20, name: 'Snehal More',              role: 'Nurse', dept: 'Cardiology',      shift: 'Evening', contact: '+91 97654 32102', status: 'On Duty' },
+            { id: 21, name: 'Rupali Kale',              role: 'Nurse', dept: 'Neurology',       shift: 'Morning', contact: '+91 97654 32103', status: 'On Duty' },
+            { id: 22, name: 'Anita Chavan',             role: 'Nurse', dept: 'Neurology',       shift: 'Evening', contact: '+91 97654 32104', status: 'On Duty' },
+            { id: 23, name: 'Meera Deshpande',          role: 'Nurse', dept: 'Pediatrics',      shift: 'Morning', contact: '+91 97654 32105', status: 'On Duty' },
+            { id: 24, name: 'Sonal Shirke',             role: 'Nurse', dept: 'Pediatrics',      shift: 'Evening', contact: '+91 97654 32106', status: 'On Duty' },
+            { id: 25, name: 'Kavita Mane',              role: 'Nurse', dept: 'Orthopedics',     shift: 'Morning', contact: '+91 97654 32107', status: 'On Duty' },
+            { id: 26, name: 'Rekha Sawant',             role: 'Nurse', dept: 'Orthopedics',     shift: 'Night',   contact: '+91 97654 32108', status: 'On Duty' },
+            { id: 27, name: 'Sunita Ghodke',            role: 'Nurse', dept: 'ICU',             shift: 'Morning', contact: '+91 97654 32109', status: 'On Duty' },
+            { id: 28, name: 'Lata Nikam',               role: 'Nurse', dept: 'ICU',             shift: 'Evening', contact: '+91 97654 32110', status: 'On Duty' },
+            { id: 29, name: 'Vaishali Thakur',          role: 'Nurse', dept: 'ICU',             shift: 'Night',   contact: '+91 97654 32111', status: 'On Duty' },
+            { id: 30, name: 'Jyoti Wagh',               role: 'Nurse', dept: 'General Medicine',shift: 'Morning', contact: '+91 97654 32112', status: 'On Duty' },
+            { id: 31, name: 'Asha Salunkhe',            role: 'Nurse', dept: 'General Medicine',shift: 'Evening', contact: '+91 97654 32113', status: 'On Duty' },
+            { id: 32, name: 'Swati Kadam',              role: 'Nurse', dept: 'Gynecology',      shift: 'Morning', contact: '+91 97654 32114', status: 'On Duty' },
+            { id: 33, name: 'Pallavi Shete',            role: 'Nurse', dept: 'Gynecology',      shift: 'Night',   contact: '+91 97654 32115', status: 'On Duty' },
+            { id: 34, name: 'Dipali Bhagat',            role: 'Nurse', dept: 'Ophthalmology',   shift: 'Morning', contact: '+91 97654 32116', status: 'On Duty' },
+            { id: 35, name: 'Rashmi Phadke',            role: 'Nurse', dept: 'Dermatology',     shift: 'Morning', contact: '+91 97654 32117', status: 'On Duty' },
+            { id: 36, name: 'Mansi Kulkarni',           role: 'Nurse', dept: 'ENT',             shift: 'Evening', contact: '+91 97654 32118', status: 'On Duty' },
+            { id: 37, name: 'Nilam Patole',             role: 'Nurse', dept: 'Dentistry',       shift: 'Morning', contact: '+91 97654 32119', status: 'On Duty' },
+            { id: 38, name: 'Pooja Gaikwad',            role: 'Nurse', dept: 'ICU',             shift: 'Morning', contact: '+91 97654 32120', status: 'On Leave' },
+            { id: 39, name: 'Shruti Avhad',             role: 'Nurse', dept: 'Cardiology',      shift: 'Night',   contact: '+91 97654 32121', status: 'On Duty' },
+            { id: 40, name: 'Rani Dhage',               role: 'Nurse', dept: 'Neurology',       shift: 'Night',   contact: '+91 97654 32122', status: 'On Duty' },
+            { id: 41, name: 'Bhagyashree Sable',        role: 'Nurse', dept: 'Pediatrics',      shift: 'Night',   contact: '+91 97654 32123', status: 'Off Duty' },
+            { id: 42, name: 'Tejal Borse',              role: 'Nurse', dept: 'General Medicine',shift: 'Night',   contact: '+91 97654 32124', status: 'On Duty' },
+
+            // ===== 6 LAB TECHNICIANS =====
+            { id: 43, name: 'Rahul Kamble',             role: 'Lab Technician', dept: 'Pathology',   shift: 'Morning', contact: '+91 96543 21001', status: 'On Duty' },
+            { id: 44, name: 'Sachin Gawade',            role: 'Lab Technician', dept: 'Pathology',   shift: 'Evening', contact: '+91 96543 21002', status: 'On Duty' },
+            { id: 45, name: 'Akash Pimpale',            role: 'Lab Technician', dept: 'Radiology',   shift: 'Morning', contact: '+91 96543 21003', status: 'On Duty' },
+            { id: 46, name: 'Nilesh Thorat',            role: 'Lab Technician', dept: 'Radiology',   shift: 'Evening', contact: '+91 96543 21004', status: 'On Duty' },
+            { id: 47, name: 'Yogesh Bhandari',          role: 'Lab Technician', dept: 'Biochemistry',shift: 'Morning', contact: '+91 96543 21005', status: 'On Leave' },
+            { id: 48, name: 'Santosh Dolas',            role: 'Lab Technician', dept: 'Microbiology',shift: 'Night',   contact: '+91 96543 21006', status: 'On Duty' },
+
+            // ===== 14 SUPPORT STAFF =====
+            { id: 49, name: 'Ramesh Shinde',            role: 'Support Staff', dept: 'Housekeeping',  shift: 'Morning', contact: '+91 95432 10001', status: 'On Duty' },
+            { id: 50, name: 'Sunil Waghmare',           role: 'Support Staff', dept: 'Housekeeping',  shift: 'Evening', contact: '+91 95432 10002', status: 'On Duty' },
+            { id: 51, name: 'Ganesh Pawar',             role: 'Support Staff', dept: 'Housekeeping',  shift: 'Night',   contact: '+91 95432 10003', status: 'On Duty' },
+            { id: 52, name: 'Manoj Londhe',             role: 'Support Staff', dept: 'Security',      shift: 'Morning', contact: '+91 95432 10004', status: 'On Duty' },
+            { id: 53, name: 'Deepak Gade',              role: 'Support Staff', dept: 'Security',      shift: 'Evening', contact: '+91 95432 10005', status: 'On Duty' },
+            { id: 54, name: 'Vishal Jagtap',            role: 'Support Staff', dept: 'Security',      shift: 'Night',   contact: '+91 95432 10006', status: 'On Duty' },
+            { id: 55, name: 'Prakash Thombare',         role: 'Support Staff', dept: 'Maintenance',   shift: 'Morning', contact: '+91 95432 10007', status: 'On Duty' },
+            { id: 56, name: 'Sandip Khedekar',          role: 'Support Staff', dept: 'Maintenance',   shift: 'Evening', contact: '+91 95432 10008', status: 'On Duty' },
+            { id: 57, name: 'Ajay Bhosale',             role: 'Support Staff', dept: 'Ambulance',     shift: 'Morning', contact: '+91 95432 10009', status: 'On Duty' },
+            { id: 58, name: 'Sagar Nimbalkar',          role: 'Support Staff', dept: 'Ambulance',     shift: 'Night',   contact: '+91 95432 10010', status: 'On Duty' },
+            { id: 59, name: 'Ravi Ghorpade',            role: 'Support Staff', dept: 'Reception',     shift: 'Morning', contact: '+91 95432 10011', status: 'On Duty' },
+            { id: 60, name: 'Anil Mhaske',              role: 'Support Staff', dept: 'Reception',     shift: 'Evening', contact: '+91 95432 10012', status: 'On Duty' },
+            { id: 61, name: 'Kishor Devkar',            role: 'Support Staff', dept: 'Pharmacy',      shift: 'Morning', contact: '+91 95432 10013', status: 'On Leave' },
+            { id: 62, name: 'Balu Sonawane',            role: 'Support Staff', dept: 'Pharmacy',      shift: 'Evening', contact: '+91 95432 10014', status: 'On Duty' },
+        ];
+        renderStaff(staffData);
+        updateStaffStats();
+    }
+
+    // Fetch Appointments
+    try {
+        const aptRes = await fetch('api/get_appointments.php');
+        appointmentsData = await aptRes.json();
+        
+        // Populate doctor filter based on appointments and staff
+        populateDoctorFilter();
+        
+        renderAppointments(appointmentsData);
+        updateAppointmentStats();
+    } catch (e) {
+        console.error('Error fetching appointments:', e);
+        renderAppointments([]);
     }
 }
 
@@ -109,6 +197,11 @@ function staffStatusBadge(status) {
     return `<span class="status-badge ${map[status] || 'badge-gray'}">${status}</span>`;
 }
 
+function appointmentStatusBadge(status) {
+    const map = { "Pending": "badge-orange", "Checked In": "badge-blue", "Completed": "badge-green", "Cancelled": "badge-red" };
+    return `<span class="status-badge ${map[status] || 'badge-gray'}">${status}</span>`;
+}
+
 // ---- RENDER FUNCTIONS ----
 
 function renderPatients(data) {
@@ -123,11 +216,36 @@ function renderPatients(data) {
             <td>${p.age}</td>
             <td>${p.ward}</td>
             <td><code style="background:#f1f5f9;padding:2px 8px;border-radius:6px;font-size:12px;">${p.bed}</code></td>
-            <td>${p.date}</td>
+            <td>${p.admission_date}</td>
             <td>${p.doctor}</td>
             <td>${patientStatusBadge(p.status)}</td>
         </tr>
     `).join('');
+}
+
+function renderAppointments(data) {
+    const tbody = document.getElementById('appointments-tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center" style="padding: 2rem;">No appointments found.</td></tr>';
+        return;
+    }
+
+    data.forEach(a => {
+        const row = `
+            <tr>
+                <td><strong>${a.name}</strong></td>
+                <td>${a.email}</td>
+                <td>${a.department}</td>
+                <td>${a.doctor_name || '<em style="color:#888;">Any</em>'}</td>
+                <td>${a.booking_date}</td>
+                <td>${appointmentStatusBadge(a.status || 'Pending')}</td>
+            </tr>
+        `;
+        tbody.innerHTML += row;
+    });
 }
 
 function renderWaste(data) {
@@ -267,6 +385,58 @@ function applyPatientFilter() {
         (p.name.toLowerCase().includes(search) || p.bed.toLowerCase().includes(search))
     );
     renderPatients(filtered);
+}
+
+// Appointments
+document.getElementById('apt-date-filter')?.addEventListener('change', applyAptFilter);
+document.getElementById('apt-doctor-filter')?.addEventListener('change', applyAptFilter);
+document.getElementById('apt-status-filter')?.addEventListener('change', applyAptFilter);
+
+function applyAptFilter() {
+    const date = document.getElementById('apt-date-filter').value;
+    const doctor = document.getElementById('apt-doctor-filter').value;
+    const status = document.getElementById('apt-status-filter').value;
+    
+    const filtered = appointmentsData.filter(a => {
+        const matchDate = !date || a.booking_date === date;
+        const matchDoc = doctor === 'all' || a.doctor_name === doctor;
+        const matchStatus = status === 'all' || a.status === status;
+        return matchDate && matchDoc && matchStatus;
+    });
+    renderAppointments(filtered);
+}
+
+function populateDoctorFilter() {
+    const select = document.getElementById('apt-doctor-filter');
+    if (!select) return;
+    
+    // Extract unique doctors from staffData (mock or real) and appointments
+    let doctorNames = staffData.filter(s => s.role === 'Doctor').map(s => s.name);
+    appointmentsData.forEach(a => {
+        if (a.doctor_name && !doctorNames.includes(a.doctor_name)) {
+            doctorNames.push(a.doctor_name);
+        }
+    });
+    
+    // Sort alphabetically
+    doctorNames.sort();
+    
+    select.innerHTML = '<option value="all">All Doctors</option>';
+    doctorNames.forEach(doc => {
+        select.innerHTML += `<option value="${doc}">${doc}</option>`;
+    });
+}
+
+function updateAppointmentStats() {
+    const today = new Date().toISOString().split('T')[0];
+    const todayCount = appointmentsData.filter(a => a.booking_date === today).length;
+    const pendingCount = appointmentsData.filter(a => a.status === 'Pending').length;
+    
+    const todayEl = document.getElementById('apt-total-today');
+    const pendingEl = document.getElementById('apt-total-pending');
+    
+    if (todayEl) todayEl.textContent = todayCount;
+    if (pendingEl) pendingEl.textContent = pendingCount;
 }
 
 // Waste

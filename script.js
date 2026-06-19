@@ -98,12 +98,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // New: Booking Form Submission to MySQL
     const bookingForm = document.getElementById('booking-form');
+    const deptSelect = document.getElementById('department');
+    const doctorSelect = document.getElementById('doctor');
+
+    if (deptSelect && doctorSelect) {
+        deptSelect.addEventListener('change', (e) => {
+            const selectedDept = e.target.value;
+            // Clear existing options except the first one
+            doctorSelect.innerHTML = '<option value="" selected>Any Available Doctor</option>';
+            
+            // Filter doctors by selected department
+            const availableDoctors = doctorsData.filter(d => d.category === selectedDept || selectedDept === 'general');
+            
+            availableDoctors.forEach(doc => {
+                const option = document.createElement('option');
+                option.value = doc.name;
+                option.textContent = doc.name;
+                doctorSelect.appendChild(option);
+            });
+        });
+    }
+
     if (bookingForm) {
         bookingForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const name = document.getElementById('name').value;
             const email = document.getElementById('email').value;
             const dept = document.getElementById('department').value;
+            const doctor = document.getElementById('doctor').value;
             const date = document.getElementById('date').value;
             
             const btn = bookingForm.querySelector('button[type="submit"]');
@@ -111,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.innerText = 'Processing...';
             btn.disabled = true;
 
-            const payload = { name, email, department: dept, date };
+            const payload = { name, email, department: dept, doctor_name: doctor, date };
 
             fetch('api/book_appointment.php', {
                 method: 'POST',
