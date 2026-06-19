@@ -243,7 +243,13 @@
 
                 <div class="card">
                     <div class="card-header">
-                        <h2><i class="fa-solid fa-bed-pulse"></i> Patient & Bed Status</h2>
+                        <h2>
+                            <i class="fa-solid fa-bed-pulse"></i> Patient & Bed Status
+                            <div class="view-toggle" style="margin-left: 15px; display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: white; padding: 2px;">
+                                <button class="toggle-btn active" id="btn-patient-list" title="List View" style="padding: 6px 12px; border: none; background: var(--primary); color: white; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-family: var(--font); font-size: 12px; font-weight: 600; transition: all 0.2s;"><i class="fa-solid fa-list"></i> List View</button>
+                                <button class="toggle-btn" id="btn-bed-map" title="Bed Map View" style="padding: 6px 12px; border: none; background: transparent; color: var(--text-muted); border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-family: var(--font); font-size: 12px; font-weight: 600; transition: all 0.2s;"><i class="fa-solid fa-grip"></i> Bed Map View</button>
+                            </div>
+                        </h2>
                         <div class="filter-group">
                             <input type="text" id="patient-search" class="search-input" placeholder="Search patient or bed...">
                             <select class="filter-select" id="ward-filter">
@@ -257,7 +263,7 @@
                             <button class="btn-add" onclick="openModal('modal-patient')"><i class="fa-solid fa-plus"></i> Add Patient</button>
                         </div>
                     </div>
-                    <div class="table-wrapper">
+                    <div class="table-wrapper" id="patients-table-wrapper">
                         <table class="data-table" id="patients-table">
                             <thead>
                                 <tr>
@@ -268,10 +274,14 @@
                                     <th>Admission Date</th>
                                     <th>Doctor</th>
                                     <th>Status</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="patients-tbody"></tbody>
                         </table>
+                    </div>
+                    <div id="patient-bed-visualizer" style="display: none; padding: 24px;">
+                        <!-- Will be rendered dynamically via JS -->
                     </div>
                 </div>
             </div>

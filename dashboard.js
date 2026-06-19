@@ -15,6 +15,7 @@ async function fetchAllData() {
         patientsData = await patientsRes.json();
         renderPatients(patientsData);
         updatePatientStats();
+        renderBedVisualizer();
     } catch (e) { 
         console.error('Error fetching patients:', e); 
         renderPatients([]);
@@ -207,20 +208,32 @@ function appointmentStatusBadge(status) {
 function renderPatients(data) {
     const tbody = document.getElementById('patients-tbody');
     if (!data.length) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-muted);">No records found.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text-muted);">No records found.</td></tr>`;
         return;
     }
-    tbody.innerHTML = data.map(p => `
-        <tr>
-            <td><strong>${p.name}</strong></td>
-            <td>${p.age}</td>
-            <td>${p.ward}</td>
-            <td><code style="background:#f1f5f9;padding:2px 8px;border-radius:6px;font-size:12px;">${p.bed}</code></td>
-            <td>${p.admission_date}</td>
-            <td>${p.doctor}</td>
-            <td>${patientStatusBadge(p.status)}</td>
-        </tr>
-    `).join('');
+    tbody.innerHTML = data.map(p => {
+        const dischargeBtn = p.status !== 'Discharge' 
+            ? `<button class="action-btn action-btn-discharge" onclick="dischargePatient(${p.id})"><i class="fa-solid fa-right-from-bracket"></i> Discharge</button>`
+            : `<button class="action-btn" style="background:#f1f5f9;color:#94a3b8;cursor:not-allowed;" disabled><i class="fa-solid fa-check"></i> Discharged</button>`;
+        const deleteBtn = `<button class="action-btn action-btn-delete" onclick="deletePatient(${p.id})"><i class="fa-solid fa-trash-can"></i> Delete</button>`;
+        return `
+            <tr>
+                <td><strong>${p.name}</strong></td>
+                <td>${p.age}</td>
+                <td>${p.ward}</td>
+                <td><code style="background:#f1f5f9;padding:2px 8px;border-radius:6px;font-size:12px;">${p.bed}</code></td>
+                <td>${p.admission_date}</td>
+                <td>${p.doctor}</td>
+                <td>${patientStatusBadge(p.status)}</td>
+                <td>
+                    <div class="action-btn-group">
+                        ${dischargeBtn}
+                        ${deleteBtn}
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
 }
 
 function renderAppointments(data) {
@@ -385,6 +398,7 @@ function applyPatientFilter() {
         (p.name.toLowerCase().includes(search) || p.bed.toLowerCase().includes(search))
     );
     renderPatients(filtered);
+    renderBedVisualizer();
 }
 
 // Appointments
@@ -788,13 +802,7 @@ document.getElementById('form-patient').addEventListener('submit', function(e) {
     .then(data => {
         if (data.success) {
             showToast('Patient added successfully!');
-            fetch('api/get_patients.php')
-                .then(r => r.json())
-                .then(pList => {
-                    patientsData = pList;
-                    renderPatients(patientsData);
-                    updatePatientStats();
-                });
+            refreshPatientsData();
             closeModal('modal-patient');
             this.reset();
         } else {
@@ -925,5 +933,189 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         ['modal-patient', 'modal-waste', 'modal-stock', 'modal-staff', 'modal-scanner'].forEach(closeModal);
         document.body.style.overflow = '';
+    }
+});
+
+// ===== NEW VISUALIZER & ACTIONS LOGIC =====
+
+const wardsConfig = {
+    "General": { icon: "fa-solid fa-bed", bedsCount: 16, prefix: "GEN-" },
+    "ICU": { icon: "fa-solid fa-kit-medical", bedsCount: 8, prefix: "ICU-" },
+    "Pediatric": { icon: "fa-solid fa-baby", bedsCount: 8, prefix: "PED-" },
+    "Maternity": { icon: "fa-solid fa-person-breastfeeding", bedsCount: 8, prefix: "MAT-" },
+    "Orthopedic": { icon: "fa-solid fa-bone", bedsCount: 8, prefix: "ORT-" }
+};
+
+function renderBedVisualizer() {
+    const container = document.getElementById('patient-bed-visualizer');
+    if (!container) return;
+
+    const activeWardFilter = document.getElementById('ward-filter').value;
+    const activeSearch = document.getElementById('patient-search').value.toLowerCase();
+
+    let html = '';
+
+    for (const [wardName, config] of Object.entries(wardsConfig)) {
+        // Skip block if ward filter is active and doesn't match
+        if (activeWardFilter !== 'all' && activeWardFilter !== wardName) {
+            continue;
+        }
+
+        let bedsHtml = '';
+        for (let i = 1; i <= config.bedsCount; i++) {
+            const bedNo = config.prefix + String(i).padStart(2, '0');
+            
+            // Find patient assigned to this bed (excluding discharged)
+            const patient = patientsData.find(p => p.ward === wardName && p.bed === bedNo && p.status !== 'Discharge');
+
+            if (patient) {
+                // Bed is occupied
+                const isMatched = !activeSearch || 
+                    patient.name.toLowerCase().includes(activeSearch) || 
+                    patient.bed.toLowerCase().includes(activeSearch);
+                
+                const opacityStyle = isMatched ? '' : 'opacity: 0.25;';
+
+                bedsHtml += `
+                    <div class="bed-card occupied" style="${opacityStyle}">
+                        <i class="fa-solid fa-bed"></i>
+                        <span class="bed-name">${bedNo}</span>
+                        <span class="patient-init">${patient.name}</span>
+                        <div class="tooltip-content">
+                            <div class="tooltip-title">${bedNo} - Occupied</div>
+                            <div class="tooltip-row"><strong>Patient:</strong> ${patient.name}</div>
+                            <div class="tooltip-row"><strong>Age:</strong> ${patient.age} yrs</div>
+                            <div class="tooltip-row"><strong>Doctor:</strong> ${patient.doctor}</div>
+                            <div class="tooltip-row"><strong>Status:</strong> ${patient.status}</div>
+                            <div class="tooltip-actions">
+                                <span class="tooltip-discharge-btn" onclick="event.stopPropagation(); dischargePatient(${patient.id})"><i class="fa-solid fa-right-from-bracket"></i> Discharge</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Bed is available
+                const isMatched = !activeSearch || bedNo.toLowerCase().includes(activeSearch);
+                const opacityStyle = isMatched ? '' : 'opacity: 0.25;';
+
+                bedsHtml += `
+                    <div class="bed-card available" style="${opacityStyle}" onclick="allocateBed('${wardName}', '${bedNo}')">
+                        <i class="fa-solid fa-bed"></i>
+                        <span class="bed-name">${bedNo}</span>
+                        <span class="patient-init">Available</span>
+                        <div class="tooltip-content">
+                            <div class="tooltip-title">${bedNo}</div>
+                            <div class="tooltip-row" style="color:#22c55e;font-weight:600;"><i class="fa-solid fa-circle-check"></i> Available Bed</div>
+                            <div class="tooltip-row" style="margin-top:6px;font-style:italic;color:#94a3b8;font-size:11px;">Click to assign to a new patient.</div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        html += `
+            <div class="ward-block">
+                <div class="ward-title">
+                    <i class="${config.icon}"></i>
+                    <span>${wardName} Ward (${config.bedsCount} Beds)</span>
+                </div>
+                <div class="beds-grid">
+                    ${bedsHtml}
+                </div>
+            </div>
+        `;
+    }
+
+    container.innerHTML = html;
+}
+
+window.allocateBed = function(ward, bedNo) {
+    openModal('modal-patient');
+    document.getElementById('p-ward').value = ward;
+    document.getElementById('p-bed').value = bedNo;
+};
+
+window.dischargePatient = function(id) {
+    if (!confirm("Are you sure you want to discharge this patient? (तुम्हाला खरोखर या पेशंटला डिस्चार्ज करायचे आहे का?)")) return;
+    fetch('api/update_patient.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: id, status: 'Discharge' })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Patient discharged successfully!');
+            refreshPatientsData();
+        } else {
+            showToastError(data.error || 'Failed to discharge patient');
+        }
+    })
+    .catch(() => showToastError('Network error, failed to discharge patient'));
+};
+
+window.deletePatient = function(id) {
+    if (!confirm("Are you sure you want to permanently delete this patient record? (तुम्हाला खरोखर हा पेशंट रेकॉर्ड कायमचा डिलीट करायचा आहे का?)")) return;
+    fetch('api/delete_patient.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: id })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Patient record deleted successfully!');
+            refreshPatientsData();
+        } else {
+            showToastError(data.error || 'Failed to delete patient');
+        }
+    })
+    .catch(() => showToastError('Network error, failed to delete patient'));
+};
+
+function refreshPatientsData() {
+    fetch('api/get_patients.php')
+        .then(r => r.json())
+        .then(pList => {
+            patientsData = pList;
+            applyPatientFilter();
+            updatePatientStats();
+        });
+}
+
+// Toggle logic for List View and Bed Map View
+document.addEventListener('DOMContentLoaded', () => {
+    const btnList = document.getElementById('btn-patient-list');
+    const btnMap = document.getElementById('btn-bed-map');
+    const tableWrapper = document.getElementById('patients-table-wrapper');
+    const visualizer = document.getElementById('patient-bed-visualizer');
+
+    if (btnList && btnMap && tableWrapper && visualizer) {
+        btnList.addEventListener('click', () => {
+            btnList.classList.add('active');
+            btnList.style.background = 'var(--primary)';
+            btnList.style.color = 'white';
+
+            btnMap.classList.remove('active');
+            btnMap.style.background = 'transparent';
+            btnMap.style.color = 'var(--text-muted)';
+
+            tableWrapper.style.display = 'block';
+            visualizer.style.display = 'none';
+        });
+
+        btnMap.addEventListener('click', () => {
+            btnMap.classList.add('active');
+            btnMap.style.background = 'var(--primary)';
+            btnMap.style.color = 'white';
+
+            btnList.classList.remove('active');
+            btnList.style.background = 'transparent';
+            btnList.style.color = 'var(--text-muted)';
+
+            tableWrapper.style.display = 'none';
+            visualizer.style.display = 'block';
+            renderBedVisualizer();
+        });
     }
 });
