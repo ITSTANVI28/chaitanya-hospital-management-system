@@ -7,8 +7,6 @@
     <link rel="stylesheet" href="dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Barcode Scanner Library -->
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 </head>
 <body>
 
@@ -212,6 +210,7 @@
                                     <th>Doctor</th>
                                     <th>Booking Date</th>
                                     <th>Status</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="appointments-tbody"></tbody>
@@ -225,7 +224,7 @@
                 <div class="summary-cards">
                     <div class="summary-card blue">
                         <div class="card-icon"><i class="fa-solid fa-bed-pulse"></i></div>
-                        <div class="card-info"><h3 id="patient-total-beds">48</h3><p>Total Beds</p></div>
+                        <div class="card-info"><h3 id="patient-total-beds">50</h3><p>Total Beds</p></div>
                     </div>
                     <div class="summary-card red">
                         <div class="card-icon"><i class="fa-solid fa-bed"></i></div>
@@ -326,12 +325,36 @@
                                 <tr>
                                     <th>Date</th>
                                     <th>Waste Type</th>
+                                    <th>Item / Product</th>
                                     <th>Department</th>
                                     <th>Weight (kg)</th>
                                     <th>Disposal Status</th>
                                 </tr>
                             </thead>
                             <tbody id="waste-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- Dispose Cart Section -->
+                <div class="card" style="margin-top: 24px;">
+                    <div class="card-header" style="background-color: rgba(239, 68, 68, 0.1); border-bottom: 1px solid rgba(239, 68, 68, 0.2);">
+                        <h2 style="color: var(--danger);"><i class="fa-solid fa-dumpster-fire"></i> Dispose Cart (Failed)</h2>
+                    </div>
+                    <div class="table-wrapper">
+                        <table class="data-table" id="dispose-cart-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Waste Type</th>
+                                    <th>Item / Product</th>
+                                    <th>Department</th>
+                                    <th>Weight (kg)</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dispose-cart-tbody">
+                                <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted);">Cart is empty.</td></tr>
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -354,7 +377,7 @@
                     </div>
                     <div class="summary-card orange">
                         <div class="card-icon"><i class="fa-solid fa-clock"></i></div>
-                        <div class="card-info"><h3>2</h3><p>Pending Orders</p></div>
+                        <div class="card-info"><h3 id="pending-orders-count">0</h3><p>Pending Orders</p></div>
                     </div>
                 </div>
 
@@ -370,8 +393,7 @@
                                 <option value="Consumables">Consumables</option>
                                 <option value="Lab Supplies">Lab Supplies</option>
                             </select>
-                            <button class="btn-add" onclick="openModal('modal-stock')"><i class="fa-solid fa-plus"></i> Add Item</button>
-                            <button class="btn-scan" onclick="openScannerModal()"><i class="fa-solid fa-barcode"></i> Scan Barcode</button>
+                             <button class="btn-add" onclick="openModal('modal-stock')"><i class="fa-solid fa-plus"></i> Add Item</button>
                         </div>
                     </div>
                     <div class="table-wrapper">
@@ -392,6 +414,40 @@
                         </table>
                     </div>
                 </div>
+                <!-- Urgent Stock Alerts Card -->
+                <div class="card" style="margin-top: 24px;">
+                    <div class="card-header" style="background-color: rgba(239, 68, 68, 0.1); border-bottom: 1px solid rgba(239, 68, 68, 0.2);">
+                        <h2 style="color: var(--red);"><i class="fa-solid fa-triangle-exclamation" style="color: var(--red);"></i> Urgent Stock Alerts</h2>
+                    </div>
+                    <div id="stock-alerts-list"></div>
+                </div>
+
+                <!-- Stock Orders Log -->
+                <div class="card" style="margin-top: 24px;">
+                    <div class="card-header">
+                        <h2><i class="fa-solid fa-clock"></i> Stock Orders Log</h2>
+                        <div class="filter-group">
+                            <button class="btn-add" onclick="openModal('modal-stock-order')"><i class="fa-solid fa-plus"></i> New Order</button>
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table class="data-table" id="stock-orders-table">
+                            <thead>
+                                <tr>
+                                    <th>Item Name</th>
+                                    <th>Qty Ordered</th>
+                                    <th>Unit</th>
+                                    <th>Supplier</th>
+                                    <th>Order Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stock-orders-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
             </div>
 
             <!-- ===== STAFF INFO TAB ===== -->
@@ -555,13 +611,19 @@
                         <input type="date" id="w-date" required>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label>Disposal Status *</label>
-                    <select id="w-status" required>
-                        <option value="">Select Status</option>
-                        <option>Disposed</option>
-                        <option>Pending</option>
-                    </select>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Item / Product Name *</label>
+                        <input type="text" id="w-item" placeholder="e.g. Used Syringes" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Disposal Status *</label>
+                        <select id="w-status" required>
+                            <option value="">Select Status</option>
+                            <option>Disposed</option>
+                            <option>Pending</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn-cancel" onclick="closeModal('modal-waste')">Cancel</button>
@@ -637,6 +699,46 @@
         </div>
     </div>
 
+    <!-- ===== MODAL: PLACE STOCK ORDER ===== -->
+    <div class="modal-overlay" id="modal-stock-order" onclick="closeOnOverlay(event, 'modal-stock-order')">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-clock"></i> Place Stock Order</h3>
+                <button class="modal-close" onclick="closeModal('modal-stock-order')">&times;</button>
+            </div>
+            <form class="modal-form" id="form-stock-order">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Item Name *</label>
+                        <input type="text" id="so-name" placeholder="e.g. Paracetamol 500mg" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Quantity *</label>
+                        <input type="number" id="so-qty" placeholder="Order quantity" min="1" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Unit *</label>
+                        <input type="text" id="so-unit" placeholder="e.g. Tablets, Pcs, Bottles" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Order Date *</label>
+                        <input type="date" id="so-date" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Supplier Name *</label>
+                    <input type="text" id="so-supplier" placeholder="e.g. PharmaCorp" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal('modal-stock-order')">Cancel</button>
+                    <button type="submit" class="btn-save"><i class="fa-solid fa-cart-shopping"></i> Place Order</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- ===== MODAL: ADD STAFF ===== -->
     <div class="modal-overlay" id="modal-staff" onclick="closeOnOverlay(event, 'modal-staff')">
         <div class="modal-box">
@@ -699,95 +801,7 @@
         </div>
     </div>
 
-    <!-- ===== MODAL: BARCODE SCANNER ===== -->
-    <div class="modal-overlay" id="modal-scanner" onclick="closeOnOverlay(event, 'modal-scanner')">
-        <div class="modal-box scanner-modal-box">
-            <div class="modal-header">
-                <h3><i class="fa-solid fa-barcode"></i> Scan Medicine Barcode</h3>
-                <button class="modal-close" onclick="closeModal('modal-scanner')">&times;</button>
-            </div>
-            <div class="scanner-body">
 
-                <!-- Live Camera Scanner -->
-                <div class="scan-method">
-                    <p class="scan-method-label"><i class="fa-solid fa-camera"></i> Live Camera Scan (localhost वर काम करतो)</p>
-                    <div id="scanner-preview"></div>
-                    <button class="btn-scan" id="btn-start-cam" onclick="startLiveCamera()" style="width:100%;justify-content:center;margin-top:8px;">
-                        <i class="fa-solid fa-video"></i> Live Camera सुरू करा
-                    </button>
-                    <button class="btn-cancel" id="btn-stop-cam" onclick="stopLiveCamera()" style="width:100%;justify-content:center;margin-top:6px;display:none;">
-                        <i class="fa-solid fa-stop"></i> Camera बंद करा
-                    </button>
-                </div>
-
-                <!-- OR -->
-                <div class="scan-or"><span>किंवा</span></div>
-
-                <!-- Photo Capture -->
-                <div class="scan-method">
-                    <p class="scan-method-label"><i class="fa-solid fa-image"></i> Photo काढून / Upload करून Scan करा</p>
-                    <div style="display:flex;gap:10px;">
-                        <label class="camera-capture-btn" for="camera-input" style="flex:1;padding:14px 10px;">
-                            <i class="fa-solid fa-camera"></i>
-                            <span style="font-size:13px;">Camera Photo</span>
-                        </label>
-                        <label class="camera-capture-btn upload-btn" for="image-upload-input" style="flex:1;padding:14px 10px;">
-                            <i class="fa-solid fa-upload"></i>
-                            <span style="font-size:13px;">Gallery Upload</span>
-                        </label>
-                    </div>
-                    <input type="file" id="camera-input" accept="image/*" capture="environment" style="display:none;">
-                    <input type="file" id="image-upload-input" accept="image/*" style="display:none;">
-                </div>
-
-                <!-- OR -->
-                <div class="scan-or"><span>किंवा</span></div>
-
-                <!-- Manual -->
-                <div class="scan-method">
-                    <p class="scan-method-label"><i class="fa-solid fa-keyboard"></i> Manual Barcode Entry</p>
-                    <div class="manual-row">
-                        <input type="text" id="manual-barcode" placeholder="13 digit barcode number..." class="search-input">
-                        <button class="btn-add" onclick="lookupBarcode(document.getElementById('manual-barcode').value)">
-                            <i class="fa-solid fa-magnifying-glass"></i> Lookup
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Processing -->
-                <div id="scanner-processing" style="display:none;" class="scanner-processing">
-                    <i class="fa-solid fa-spinner fa-spin"></i> Barcode detect करत आहे...
-                </div>
-
-                <!-- Result -->
-                <div class="scanner-result" id="scanner-result" style="display:none; flex-direction: column; align-items: stretch; text-align: left; gap: 10px;">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <div class="result-icon" id="result-icon"><i class="fa-solid fa-circle-check"></i></div>
-                        <div class="result-info">
-                            <p id="result-name" style="margin-bottom: 2px;">Medicine Name</p>
-                            <span id="result-barcode">Barcode: —</span>
-                        </div>
-                    </div>
-                    <div class="scanned-details" style="font-size: 13px; color: #475569; background: #f8fafc; padding: 10px; border-radius: 8px;">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                            <div><strong>Category:</strong> <span id="result-category">—</span></div>
-                            <div><strong>Unit:</strong> <span id="result-unit">—</span></div>
-                            <div><strong>Batch:</strong> <span id="result-batch">—</span></div>
-                            <div><strong>Expiry:</strong> <span id="result-expiry">—</span></div>
-                            <div style="grid-column: span 2;"><strong>Supplier:</strong> <span id="result-supplier">—</span></div>
-                        </div>
-                    </div>
-                    <button class="btn-save" onclick="useScannedResult()" style="width: 100%; justify-content: center;">
-                        <i class="fa-solid fa-arrow-right"></i> Use This
-                    </button>
-                </div>
-
-            </div>
-        </div>
-    </div>
-
-    <!-- Hidden canvas for html5QrCode file scanning -->
-    <div id="qr-hidden-canvas" style="display:none;"></div>
 
     <!-- Toast Notification -->
     <div class="toast" id="toast"><i class="fa-solid fa-circle-check"></i> <span id="toast-msg">Saved!</span></div>

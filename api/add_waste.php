@@ -9,6 +9,7 @@ if (!$input) {
 }
 
 $date = isset($input['date']) ? trim($input['date']) : '';
+$item_name = isset($input['item_name']) ? trim($input['item_name']) : '';
 $type = isset($input['type']) ? trim($input['type']) : '';
 $dept = isset($input['dept']) ? trim($input['dept']) : '';
 $weight = isset($input['weight']) ? floatval($input['weight']) : 0.0;
@@ -21,8 +22,8 @@ if (empty($date) || empty($type) || empty($dept) || $weight <= 0.0 || empty($sta
 }
 
 try {
-    $stmt = $pdo->prepare('INSERT INTO waste_logs (date, type, department, weight, status) VALUES (?, ?, ?, ?, ?)');
-    $stmt->execute([$date, $type, $dept, $weight, $status]);
+    $stmt = $pdo->prepare('INSERT INTO waste_logs (date, item_name, type, department, weight, status) VALUES (?, ?, ?, ?, ?, ?)');
+    $stmt->execute([$date, $item_name, $type, $dept, $weight, $status]);
     echo json_encode(['success' => true, 'message' => 'Waste entry added successfully']);
 } catch (\PDOException $e) {
     http_response_code(500);

@@ -8,6 +8,7 @@ let wasteData = [];
 let stockData = [];
 let staffData = [];
 let appointmentsData = [];
+let stockOrdersData = [];
 
 async function fetchAllData() {
     try {
@@ -26,6 +27,7 @@ async function fetchAllData() {
         wasteData = await wasteRes.json();
         wasteData.forEach(w => w.weight = parseFloat(w.weight));
         renderWaste(wasteData);
+        renderDisposeCart(wasteData);
         updateWasteStats();
     } catch (e) { 
         console.error('Error fetching waste logs:', e); 
@@ -59,6 +61,21 @@ async function fetchAllData() {
         ];
         renderStock(stockData);
         renderOverviewAlerts();
+    }
+
+    try {
+        const ordersRes = await fetch('api/get_stock_orders.php');
+        stockOrdersData = await ordersRes.json();
+        stockOrdersData.forEach(o => o.qty = parseInt(o.qty));
+        renderStockOrders(stockOrdersData);
+    } catch (e) {
+        console.warn('Backend stock orders not found or error, loading mock orders.');
+        stockOrdersData = [
+            { id: 1, item_name: 'Crocin 650mg', qty: 500, unit: 'Tablets', supplier_name: 'GlaxoSmithKline', order_date: '2026-06-18', status: 'Pending' },
+            { id: 2, item_name: 'Surgical Gloves (M)', qty: 100, unit: 'Pairs', supplier_name: 'CareGlove Inc', order_date: '2026-06-19', status: 'Pending' },
+            { id: 3, item_name: 'Amoxicillin 250mg', qty: 300, unit: 'Capsules', supplier_name: 'HealthMed Ltd', order_date: '2026-06-15', status: 'Received' }
+        ];
+        renderStockOrders(stockOrdersData);
     }
 
     try {
@@ -177,9 +194,9 @@ function wasteTypeBadge(type) {
 }
 
 function disposalBadge(status) {
-    return status === "Disposed"
-        ? `<span class="status-badge badge-green">Disposed</span>`
-        : `<span class="status-badge badge-orange">Pending</span>`;
+    if (status === "Disposed") return `<span class="status-badge badge-green">Disposed</span>`;
+    if (status === "Failed") return `<span class="status-badge badge-red">Failed</span>`;
+    return `<span class="status-badge badge-orange">Pending</span>`;
 }
 
 function stockStatusBadge(qty, min) {
@@ -242,11 +259,21 @@ function renderAppointments(data) {
     tbody.innerHTML = '';
 
     if (data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="text-center" style="padding: 2rem;">No appointments found.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center" style="padding: 2rem;">No appointments found.</td></tr>';
         return;
     }
 
     data.forEach(a => {
+        const isPending = (a.status || 'Pending') === 'Pending';
+        const isCheckedIn = a.status === 'Checked In';
+        
+        let actionBtn = '-';
+        if (isPending) {
+            actionBtn = `<button class="action-btn action-btn-discharge" onclick="checkInAppointment(${a.id})"><i class="fa-solid fa-circle-check"></i> Check In</button>`;
+        } else if (isCheckedIn) {
+            actionBtn = `<button class="action-btn" style="background:#f1f5f9;color:#94a3b8;cursor:not-allowed;" disabled><i class="fa-solid fa-check"></i> Checked In</button>`;
+        }
+
         const row = `
             <tr>
                 <td><strong>${a.name}</strong></td>
@@ -255,28 +282,181 @@ function renderAppointments(data) {
                 <td>${a.doctor_name || '<em style="color:#888;">Any</em>'}</td>
                 <td>${a.booking_date}</td>
                 <td>${appointmentStatusBadge(a.status || 'Pending')}</td>
+                <td>${actionBtn}</td>
             </tr>
         `;
         tbody.innerHTML += row;
     });
 }
 
+function refreshAppointmentsData() {
+    fetch('api/get_appointments.php')
+        .then(res => res.json())
+        .then(data => {
+            appointmentsData = data;
+            populateDoctorFilter();
+            renderAppointments(appointmentsData);
+            updateAppointmentStats();
+        })
+        .catch(e => console.error('Error refreshing appointments:', e));
+}
+
+window.checkInAppointment = function(id) {
+    if (!confirm("Are you sure you want to check in this patient for their appointment? (तुम्हाला या पेशंटचे चेक-इन करायचे आहे का?)")) return;
+    fetch('api/update_appointment_status.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: id, status: 'Checked In' })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Patient checked in successfully!');
+            refreshAppointmentsData();
+        } else {
+            showToastError(data.error || 'Failed to check in appointment');
+        }
+    })
+    .catch(() => showToastError('Network error, failed to check in appointment'));
+};
+
 function renderWaste(data) {
     const tbody = document.getElementById('waste-tbody');
-    if (!data.length) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-muted);">No records found.</td></tr>`;
+    // Filter out failed items for the main table
+    const activeData = data.filter(w => w.status !== 'Failed');
+
+    if (!activeData.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted);">No records found.</td></tr>`;
         return;
     }
-    tbody.innerHTML = data.map(w => `
-        <tr>
-            <td>${w.date}</td>
-            <td>${wasteTypeBadge(w.type)}</td>
-            <td>${w.dept}</td>
-            <td><strong>${w.weight} kg</strong></td>
-            <td>${disposalBadge(w.status)}</td>
-        </tr>
-    `).join('');
+    tbody.innerHTML = activeData.map(w => {
+        const isPending = w.status === 'Pending';
+        
+        const actionBtn = (w.status !== 'Failed' && w.status !== 'Disposed') 
+            ? `<button class="btn-delete" style="margin-left: 10px; padding: 2px 6px; font-size: 11px;" onclick="failWaste(${w.id})"><i class="fa-solid fa-xmark"></i> Fail</button>` 
+            : '';
+
+        return `
+            <tr class="${isPending ? 'row-danger' : ''}">
+                <td>${w.date}</td>
+                <td>${wasteTypeBadge(w.type)}</td>
+                <td><strong>${w.item_name || 'N/A'}</strong></td>
+                <td>${w.department || w.dept}</td>
+                <td><strong style="color:${isPending ? 'var(--red)' : 'var(--text)'}">${w.weight} kg</strong></td>
+                <td style="display: flex; align-items: center;">${disposalBadge(w.status)} ${actionBtn}</td>
+            </tr>
+        `;
+    }).join('');
 }
+
+function renderDisposeCart(data) {
+    const tbody = document.getElementById('dispose-cart-tbody');
+    const failedData = data.filter(w => w.status === 'Failed');
+
+    if (!tbody) return;
+
+    if (!failedData.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted);">Cart is empty.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = failedData.map(w => {
+        return `
+            <tr class="row-failed" style="background-color: rgba(239,68,68,0.03);">
+                <td>${w.date}</td>
+                <td>${wasteTypeBadge(w.type)}</td>
+                <td><strong style="text-decoration: line-through; opacity: 0.6; color: var(--text-muted);">${w.item_name || 'N/A'}</strong></td>
+                <td>${w.department || w.dept}</td>
+                <td><strong style="color:var(--text);">${w.weight} kg</strong></td>
+                <td>
+                    <button class="action-btn" style="background:#e0f2fe; color:#0284c7; margin-right: 8px;" onclick="retryWaste(${w.id})"><i class="fa-solid fa-rotate-right"></i> Retry</button>
+                    <button class="action-btn action-btn-delete" onclick="deleteWasteLog(${w.id})"><i class="fa-solid fa-trash-can"></i> Delete</button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+window.failWaste = function(id) {
+    if (!confirm("Are you sure you want to mark this waste entry as failed? (तुम्हाला हा waste entry fail करायचा आहे का?)")) return;
+    fetch('api/fail_waste.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: id })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Waste entry marked as failed!');
+            fetch('api/get_waste.php')
+                .then(r => r.json())
+                .then(wList => {
+                    wasteData = wList;
+                    wasteData.forEach(w => w.weight = parseFloat(w.weight));
+                    renderWaste(wasteData);
+                    renderDisposeCart(wasteData);
+                    updateWasteStats();
+                });
+        } else {
+            showToastError(data.error || 'Failed to update waste status');
+        }
+    })
+    .catch(() => showToastError('Network error'));
+};
+
+window.retryWaste = function(id) {
+    if (!confirm("Are you sure you want to retry this waste disposal? It will go back to Pending status.")) return;
+    fetch('api/retry_waste.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: id })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Waste entry moved back to Pending!');
+            fetch('api/get_waste.php')
+                .then(r => r.json())
+                .then(wList => {
+                    wasteData = wList;
+                    wasteData.forEach(w => w.weight = parseFloat(w.weight));
+                    renderWaste(wasteData);
+                    renderDisposeCart(wasteData);
+                    updateWasteStats();
+                });
+        } else {
+            showToastError(data.error || 'Failed to retry waste disposal');
+        }
+    })
+    .catch(() => showToastError('Network error'));
+};
+
+window.deleteWasteLog = function(id) {
+    if (!confirm("Are you sure you want to permanently delete this waste entry? This cannot be undone.")) return;
+    fetch('api/delete_waste_log.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: id })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Waste entry permanently deleted!');
+            fetch('api/get_waste.php')
+                .then(r => r.json())
+                .then(wList => {
+                    wasteData = wList;
+                    wasteData.forEach(w => w.weight = parseFloat(w.weight));
+                    renderWaste(wasteData);
+                    renderDisposeCart(wasteData);
+                    updateWasteStats();
+                });
+        } else {
+            showToastError(data.error || 'Failed to delete waste entry');
+        }
+    })
+    .catch(() => showToastError('Network error'));
+};
 
 function renderStock(data) {
     const tbody = document.getElementById('stock-tbody');
@@ -310,6 +490,40 @@ function renderStock(data) {
     }).join('');
 }
 
+function renderStockOrders(data) {
+    const tbody = document.getElementById('stock-orders-tbody');
+    if (!tbody) return;
+
+    const pendingCount = data.filter(o => o.status === 'Pending').length;
+    const pendingEl = document.getElementById('pending-orders-count');
+    if (pendingEl) pendingEl.textContent = pendingCount;
+
+    if (!data.length) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-muted);">No records found.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = data.map(o => {
+        const isPending = o.status === 'Pending';
+        const badgeClass = isPending ? 'badge-orange' : 'badge-green';
+        const actionBtn = isPending
+            ? `<button class="action-btn action-btn-discharge" onclick="receiveStockOrder(${o.id})"><i class="fa-solid fa-circle-check"></i> Mark Received</button>`
+            : `<button class="action-btn" style="background:#f1f5f9;color:#94a3b8;cursor:not-allowed;" disabled><i class="fa-solid fa-check"></i> Received</button>`;
+
+        return `
+            <tr>
+                <td><strong>${o.item_name}</strong></td>
+                <td><strong>${o.qty}</strong></td>
+                <td>${o.unit}</td>
+                <td>${o.supplier_name}</td>
+                <td>${o.order_date}</td>
+                <td><span class="status-badge ${badgeClass}">${o.status}</span></td>
+                <td>${actionBtn}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
 function renderStaff(data) {
     const tbody = document.getElementById('staff-tbody');
     if (!data.length) {
@@ -320,7 +534,7 @@ function renderStaff(data) {
         <tr>
             <td><strong>${s.name}</strong></td>
             <td>${s.role}</td>
-            <td>${s.dept}</td>
+            <td>${s.department || s.dept}</td>
             <td>${shiftBadge(s.shift)}</td>
             <td>${s.contact}</td>
             <td>${staffStatusBadge(s.status)}</td>
@@ -330,21 +544,44 @@ function renderStaff(data) {
 
 function renderOverviewAlerts() {
     const alerts = stockData.filter(s => s.qty < s.min);
-    const list = document.getElementById('overview-alerts-list');
-    if (!alerts.length) {
-        list.innerHTML = `<p style="padding:20px;color:var(--text-muted);text-align:center;">All stock levels are OK!</p>`;
-        return;
+    
+    // Update Overview Tab alerts
+    const listOverview = document.getElementById('overview-alerts-list');
+    if (listOverview) {
+        if (!alerts.length) {
+            listOverview.innerHTML = `<p style="padding:20px;color:var(--text-muted);text-align:center;">All stock levels are OK!</p>`;
+        } else {
+            listOverview.innerHTML = alerts.map(a => `
+                <div class="alert-item">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <div class="alert-item-info">
+                        <p>${a.name}</p>
+                        <span>${a.qty} ${a.unit} remaining (Min: ${a.min} ${a.unit})</span>
+                    </div>
+                    <span class="status-badge badge-red" style="margin-left:auto;">Urgent</span>
+                </div>
+            `).join('');
+        }
     }
-    list.innerHTML = alerts.map(a => `
-        <div class="alert-item">
-            <i class="fa-solid fa-circle-exclamation"></i>
-            <div class="alert-item-info">
-                <p>${a.name}</p>
-                <span>${a.qty} ${a.unit} remaining (Min: ${a.min} ${a.unit})</span>
-            </div>
-            <span class="status-badge badge-red" style="margin-left:auto;">Urgent</span>
-        </div>
-    `).join('');
+
+    // Update Stock Management Tab alerts
+    const listStock = document.getElementById('stock-alerts-list');
+    if (listStock) {
+        if (!alerts.length) {
+            listStock.innerHTML = `<p style="padding:20px;color:var(--text-muted);text-align:center;">All stock levels are OK!</p>`;
+        } else {
+            listStock.innerHTML = alerts.map(a => `
+                <div class="alert-item">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <div class="alert-item-info">
+                        <p>${a.name}</p>
+                        <span>${a.qty} ${a.unit} remaining (Min: ${a.min} ${a.unit})</span>
+                    </div>
+                    <span class="status-badge badge-red" style="margin-left:auto;">Urgent</span>
+                </div>
+            `).join('');
+        }
+    }
 }
 
 // ---- TAB NAVIGATION ----
@@ -458,6 +695,7 @@ document.getElementById('waste-filter').addEventListener('change', () => {
     const type = document.getElementById('waste-filter').value;
     const filtered = type === 'all' ? wasteData : wasteData.filter(w => w.type === type);
     renderWaste(filtered);
+    renderDisposeCart(filtered);
 });
 
 // Stock
@@ -583,158 +821,7 @@ function updateWasteStats() {
 // ---- INITIAL RENDER ----
 fetchAllData();
 
-// ---- BARCODE SCANNER ----
 
-// Demo medicine barcode database (Indian medicine barcodes)
-const medicineBarcodeDB = {
-    "8901030827737": { name: "Paracetamol 500mg", batch_number: "B12345", category: "Medicines", unit: "Tablets", purchase_date: "2026-01-10", expiry_date: "2028-01-10", supplier_name: "PharmaCorp" },
-    "8906017060018": { name: "Remdesivir 100mg Injection", batch_number: "RD9922", category: "Medicines", unit: "Vials", purchase_date: "2026-04-10", expiry_date: "2027-04-10", supplier_name: "Cipla Ltd" },
-    "8904112800126": { name: "Azithromycin 500mg", batch_number: "AZ7741", category: "Medicines", unit: "Tablets", purchase_date: "2026-02-15", expiry_date: "2028-02-15", supplier_name: "PharmaCorp" },
-    "8901234567890": { name: "Amoxicillin 250mg", batch_number: "A98765", category: "Medicines", unit: "Capsules", purchase_date: "2025-11-20", expiry_date: "2027-11-20", supplier_name: "HealthMed Ltd" },
-    "8906001234567": { name: "Propofol 1% 50ml", batch_number: "PRP001", category: "Medicines", unit: "Vials", purchase_date: "2026-05-01", expiry_date: "2027-05-01", supplier_name: "Abbott Healthcare" },
-    "8901030856737": { name: "Ceftriaxone 1g Injection", batch_number: "CEF332", category: "Medicines", unit: "Vials", purchase_date: "2026-02-28", expiry_date: "2028-02-28", supplier_name: "Alkem Labs" },
-    "8906022001122": { name: "Surgical Gloves (M)", batch_number: "SG8822", category: "Consumables", unit: "Pairs", purchase_date: "2026-05-12", expiry_date: "2030-05-12", supplier_name: "CareGlove Inc" },
-    "4006381333931": { name: "IV Drip Set", batch_number: "IV0012", category: "Consumables", unit: "Pcs", purchase_date: "2026-03-05", expiry_date: "2029-03-05", supplier_name: "MediSupply" },
-    "8901764000127": { name: "Adrenaline 1mg/ml", batch_number: "ADR445", category: "Medicines", unit: "Ampoules", purchase_date: "2026-01-20", expiry_date: "2028-01-20", supplier_name: "Sun Pharma" },
-    "8901030867891": { name: "Medical Oxygen Cylinder (Type B)", batch_number: "O2-B-112", category: "Equipment", unit: "Cylinders", purchase_date: "2026-06-15", expiry_date: "2036-06-15", supplier_name: "Linde Gas" },
-};
-
-let html5QrCode = null;
-let html5QrCodeLive = null;
-let lastScannedData = null;
-
-function openScannerModal() {
-    openModal('modal-scanner');
-    document.getElementById('scanner-result').style.display  = 'none';
-    document.getElementById('scanner-processing').style.display = 'none';
-    document.getElementById('manual-barcode').value = '';
-    document.getElementById('scanner-preview').innerHTML = '';
-    document.getElementById('btn-start-cam').style.display = 'flex';
-    document.getElementById('btn-stop-cam').style.display  = 'none';
-    if (!html5QrCode) html5QrCode = new Html5Qrcode("qr-hidden-canvas");
-}
-
-function startLiveCamera() {
-    document.getElementById('btn-start-cam').style.display = 'none';
-    document.getElementById('btn-stop-cam').style.display  = 'block';
-    document.getElementById('scanner-preview').innerHTML   = '';
-
-    html5QrCodeLive = new Html5Qrcode("scanner-preview");
-    html5QrCodeLive.start(
-        { facingMode: "environment" },
-        {
-            fps: 15,
-            qrbox: { width: 280, height: 100 },
-            formatsToSupport: [
-                Html5QrcodeSupportedFormats.EAN_13,
-                Html5QrcodeSupportedFormats.EAN_8,
-                Html5QrcodeSupportedFormats.CODE_128,
-                Html5QrcodeSupportedFormats.CODE_39,
-                Html5QrcodeSupportedFormats.UPC_A,
-                Html5QrcodeSupportedFormats.UPC_E,
-                Html5QrcodeSupportedFormats.QR_CODE,
-            ],
-            experimentalFeatures: { useBarCodeDetectorIfSupported: true },
-        },
-        (decodedText) => {
-            stopLiveCamera();
-            lookupBarcode(decodedText);
-        },
-        () => {}
-    ).catch(() => {
-        document.getElementById('scanner-preview').innerHTML =
-            `<div style="text-align:center;padding:24px;color:#94a3b8;">
-                <i class="fa-solid fa-lock" style="font-size:32px;margin-bottom:8px;display:block;color:#ef4444;"></i>
-                <p style="font-weight:700;color:#475569;font-size:14px;">Live camera साठी localhost लागतो</p>
-                <p style="font-size:12px;margin-top:6px;">📁 HMS folder मधील <strong>start-server.bat</strong> double-click करा<br>
-                मग browser मध्ये <strong>http://localhost:8000/dashboard.html</strong> उघडा</p>
-            </div>`;
-        document.getElementById('btn-start-cam').style.display = 'flex';
-        document.getElementById('btn-stop-cam').style.display  = 'none';
-    });
-}
-
-function stopLiveCamera() {
-    if (html5QrCodeLive && html5QrCodeLive.isScanning) {
-        html5QrCodeLive.stop().catch(() => {});
-    }
-    html5QrCodeLive = null;
-    document.getElementById('btn-start-cam').style.display = 'flex';
-    document.getElementById('btn-stop-cam').style.display  = 'none';
-}
-
-
-// Handle camera capture input
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('camera-input').addEventListener('change', handleImageFile);
-    document.getElementById('image-upload-input').addEventListener('change', handleImageFile);
-});
-
-function handleImageFile(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    document.getElementById('scanner-result').style.display  = 'none';
-    document.getElementById('scanner-processing').style.display = 'flex';
-
-    if (!html5QrCode) html5QrCode = new Html5Qrcode("qr-hidden-canvas");
-
-    html5QrCode.scanFile(file, true)
-        .then(decodedText => {
-            document.getElementById('scanner-processing').style.display = 'none';
-            lookupBarcode(decodedText);
-        })
-        .catch(() => {
-            document.getElementById('scanner-processing').style.display = 'none';
-            showToastError('Barcode detect झाला नाही! चांगल्या light मध्ये clear photo काढा.');
-        });
-
-    // Reset input so same file can be selected again
-    event.target.value = '';
-}
-
-function lookupBarcode(barcode) {
-    if (!barcode || barcode.trim() === '') {
-        showToastError('Barcode empty आहे!');
-        return;
-    }
-    barcode = barcode.trim();
-    const found = medicineBarcodeDB[barcode];
-    lastScannedData = found
-        ? { ...found, barcode }
-        : { name: `Item (${barcode})`, category: "Medicines", unit: "Pcs", barcode };
-
-    document.getElementById('result-name').textContent    = lastScannedData.name;
-    document.getElementById('result-barcode').textContent = `Barcode: ${barcode}`;
-    
-    document.getElementById('result-category').textContent = lastScannedData.category || '—';
-    document.getElementById('result-unit').textContent = lastScannedData.unit || '—';
-    document.getElementById('result-batch').textContent = lastScannedData.batch_number || '—';
-    document.getElementById('result-expiry').textContent = lastScannedData.expiry_date || '—';
-    document.getElementById('result-supplier').textContent = lastScannedData.supplier_name || '—';
-
-    document.getElementById('scanner-result').style.display = 'flex';
-
-    document.getElementById('result-icon').innerHTML = found
-        ? '<i class="fa-solid fa-circle-check"></i>'
-        : '<i class="fa-solid fa-circle-question" style="color:#ea580c"></i>';
-}
-
-function useScannedResult() {
-    if (!lastScannedData) return;
-    document.getElementById('s-name').value     = lastScannedData.name;
-    document.getElementById('s-category').value = lastScannedData.category;
-    document.getElementById('s-unit').value      = lastScannedData.unit;
-    
-    if (lastScannedData.batch_number) document.getElementById('s-batch').value = lastScannedData.batch_number;
-    if (lastScannedData.purchase_date) document.getElementById('s-purchase-date').value = lastScannedData.purchase_date;
-    if (lastScannedData.expiry_date) document.getElementById('s-expiry-date').value = lastScannedData.expiry_date;
-    if (lastScannedData.supplier_name) document.getElementById('s-supplier').value = lastScannedData.supplier_name;
-    
-    closeModal('modal-scanner');
-    openModal('modal-stock');
-    showToast(`"${lastScannedData.name}" form मध्ये भरले!`);
-}
 
 
 function showToastError(msg) {
@@ -762,9 +849,6 @@ function openModal(id) {
 function closeModal(id) {
     document.getElementById(id).classList.remove('open');
     document.body.style.overflow = '';
-    if (id === 'modal-scanner') {
-        stopLiveCamera();
-    }
 }
 
 function closeOnOverlay(event, id) {
@@ -817,11 +901,12 @@ document.getElementById('form-waste').addEventListener('submit', function(e) {
     e.preventDefault();
     const today = new Date().toISOString().split('T')[0];
     const payload = {
-        date:   document.getElementById('w-date').value || today,
-        type:   document.getElementById('w-type').value,
-        dept:   document.getElementById('w-dept').value,
-        weight: parseFloat(document.getElementById('w-weight').value),
-        status: document.getElementById('w-status').value,
+        date:      document.getElementById('w-date').value || today,
+        type:      document.getElementById('w-type').value,
+        item_name: document.getElementById('w-item').value,
+        dept:      document.getElementById('w-dept').value,
+        weight:    parseFloat(document.getElementById('w-weight').value),
+        status:    document.getElementById('w-status').value,
     };
     fetch('api/add_waste.php', {
         method: 'POST',
@@ -928,10 +1013,80 @@ document.getElementById('form-staff').addEventListener('submit', function(e) {
     .catch(() => showToastError('Network error'));
 });
 
+// Add Stock Order
+document.getElementById('form-stock-order').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const payload = {
+        item_name:     document.getElementById('so-name').value,
+        qty:           parseInt(document.getElementById('so-qty').value),
+        unit:          document.getElementById('so-unit').value,
+        supplier_name: document.getElementById('so-supplier').value,
+        order_date:    document.getElementById('so-date').value,
+    };
+    fetch('api/add_stock_order.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Stock order placed successfully!');
+            refreshStockOrdersData();
+            closeModal('modal-stock-order');
+            this.reset();
+        } else {
+            showToastError(data.error || 'Failed to place stock order');
+        }
+    })
+    .catch(() => showToastError('Network error'));
+});
+
+window.receiveStockOrder = function(id) {
+    if (!confirm("Are you sure you want to mark this order as received? This will automatically update your inventory. (तुम्हाला खरोखर हा स्टॉक मिळाल्याची नोंद करायची आहे का? याने तुमच्या इन्व्हेंटरीमध्ये स्टॉक वाढेल.)")) return;
+    fetch('api/receive_stock_order.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: id })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Stock received and inventory updated!');
+            refreshStockOrdersData();
+            // Also refresh stock inventory data
+            fetch('api/get_stock.php')
+                .then(r => r.json())
+                .then(sList => {
+                    stockData = sList;
+                    stockData.forEach(s => {
+                        s.qty = parseInt(s.qty);
+                        s.min = parseInt(s.min_threshold);
+                    });
+                    renderStock(stockData);
+                    renderOverviewAlerts();
+                });
+        } else {
+            showToastError(data.error || 'Failed to process received stock');
+        }
+    })
+    .catch(() => showToastError('Network error'));
+};
+
+function refreshStockOrdersData() {
+    fetch('api/get_stock_orders.php')
+        .then(r => r.json())
+        .then(oList => {
+            stockOrdersData = oList;
+            stockOrdersData.forEach(o => o.qty = parseInt(o.qty));
+            renderStockOrders(stockOrdersData);
+        });
+}
+
 // Close modal on ESC key
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-        ['modal-patient', 'modal-waste', 'modal-stock', 'modal-staff', 'modal-scanner'].forEach(closeModal);
+        ['modal-patient', 'modal-waste', 'modal-stock', 'modal-staff', 'modal-stock-order'].forEach(closeModal);
         document.body.style.overflow = '';
     }
 });

@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS waste_logs (
     type ENUM('Biomedical', 'Sharps', 'General') NOT NULL,
     department VARCHAR(50) NOT NULL,
     weight DECIMAL(5,2) NOT NULL,
-    status ENUM('Disposed', 'Pending') NOT NULL
+    status ENUM('Disposed', 'Pending', 'Failed') NOT NULL
 ) ENGINE=InnoDB;
 
 -- Table for stock / inventory items
@@ -58,4 +58,15 @@ CREATE TABLE IF NOT EXISTS appointments (
     booking_date DATE NOT NULL,
     status ENUM('Pending', 'Checked In', 'Completed', 'Cancelled') DEFAULT 'Pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- Table for stock / inventory orders
+CREATE TABLE IF NOT EXISTS stock_orders (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    item_name VARCHAR(100) NOT NULL,
+    qty INT NOT NULL,
+    unit VARCHAR(20) NOT NULL,
+    supplier_name VARCHAR(100) NOT NULL,
+    order_date DATE NOT NULL,
+    status ENUM('Pending', 'Received') DEFAULT 'Pending'
 ) ENGINE=InnoDB;

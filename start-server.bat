@@ -1,62 +1,62 @@
 @echo off
-title Chaitanya Hospital - Local Server
+title Chaitanya Hospital - PHP Local Server
 color 0A
 
 echo =========================================
 echo   Chaitanya Multi Speciality Hospital
-echo   Local Development Server
+echo   Local PHP Development Server
 echo =========================================
 echo.
 
-:: Check if Python is installed
-python --version >nul 2>&1
-if %errorlevel% == 0 (
-    echo [OK] Python found! Starting server...
+:: Check Desktop XAMPP PHP path
+if exist "C:\Users\tanvi\OneDrive\Desktop\xampp\php\php.exe" (
+    echo [OK] Desktop XAMPP PHP found! Starting PHP server...
     echo.
     echo Server starting at: http://localhost:8000
     echo Dashboard at:       http://localhost:8000/dashboard.html
     echo.
-    echo Browser मध्ये हे address उघडा:
-    echo ---> http://localhost:8000/dashboard.html
-    echo.
-    echo Server बंद करायचे असेल तर Ctrl+C दाबा.
+    echo Browser: http://localhost:8000/dashboard.html
     echo.
     start "" "http://localhost:8000/dashboard.html"
-    python -m http.server 8000
+    "C:\Users\tanvi\OneDrive\Desktop\xampp\php\php.exe" -S localhost:8000
     goto END
 )
 
-:: Check Python3
-python3 --version >nul 2>&1
-if %errorlevel% == 0 (
-    echo [OK] Python3 found! Starting server...
+:: Check C:\xampp PHP path
+if exist "C:\xampp\php\php.exe" (
+    echo [OK] XAMPP PHP found! Starting PHP server...
+    echo.
+    echo Server starting at: http://localhost:8000
+    echo Dashboard at:       http://localhost:8000/dashboard.html
+    echo.
+    echo Browser: http://localhost:8000/dashboard.html
     echo.
     start "" "http://localhost:8000/dashboard.html"
-    python3 -m http.server 8000
+    "C:\xampp\php\php.exe" -S localhost:8000
     goto END
 )
 
-:: Check Node.js / npx
-npx --version >nul 2>&1
+:: Check if php command is available in PATH
+php --version >nul 2>&1
 if %errorlevel% == 0 (
-    echo [OK] Node.js found! Starting server...
+    echo [OK] PHP found in PATH! Starting PHP server...
     echo.
-    echo Server starting at: http://localhost:3000
+    echo Server starting at: http://localhost:8000
+    echo Dashboard at:       http://localhost:8000/dashboard.html
     echo.
-    start "" "http://localhost:3000/dashboard.html"
-    npx serve . -p 3000
+    echo Browser: http://localhost:8000/dashboard.html
+    echo.
+    start "" "http://localhost:8000/dashboard.html"
+    php -S localhost:8000
     goto END
 )
 
 :: Nothing found
-echo [ERROR] Python किंवा Node.js install नाही!
+echo [ERROR] PHP interpreter find nahi jhala!
+echo Please make sure XAMPP or PHP is installed.
 echo.
-echo खालीलपैकी एक install करा:
-echo   Python: https://www.python.org/downloads/
-echo   Node.js: https://nodejs.org/
-echo.
-echo Install केल्यानंतर हे file परत run करा.
 pause
 
 :END
 pause
+

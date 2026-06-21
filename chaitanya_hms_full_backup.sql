@@ -73,7 +73,7 @@ CREATE TABLE `inventory` (
 
 LOCK TABLES `inventory` WRITE;
 /*!40000 ALTER TABLE `inventory` DISABLE KEYS */;
-INSERT INTO `inventory` VALUES (1,'Paracetamol 500mg','B12345','Medicines',1500,200,'Tablets','2026-01-10','2028-01-10','PharmaCorp'),(2,'IV Drip Set','IV0012','Consumables',300,50,'Pcs','2026-03-05','2029-03-05','MediSupply');
+INSERT INTO `inventory` VALUES (1,'Paracetamol 500mg','B12345','Medicines',1500,200,'Tablets','2026-01-10','2028-01-10','PharmaCorp'),(2,'IV Drip Set','IV0012','Consumables',300,50,'Pcs','2026-03-05','2029-03-05','MediSupply'),(3,'Disprin 350mg','DIS456','Medicines',800,100,'Tablets','2026-04-01','2029-04-01','Reckitt Benckiser'),(4,'Pantoprazole 40mg','PAN900','Medicines',500,100,'Tablets','2026-05-10','2028-05-10','Alkem Labs'),(5,'N95 Respirator Masks','MSK-N95','Consumables',1200,300,'Pcs','2026-06-01','2031-06-01','3M India'),(6,'Dolo 650mg','DL8833','Medicines',2000,500,'Tablets','2026-06-10','2029-06-10','Micro Labs'),(7,'IV Cannula 20G','CAN-20G','Consumables',600,150,'Pcs','2026-05-20','2029-05-20','Becton Dickinson'),(8,'Crocin 650mg','CR9922','Medicines',1000,200,'Tablets','2026-06-01','2029-06-01','GlaxoSmithKline'),(9,'Betadine Ointment 20g','BT3344','Medicines',150,40,'Tubes','2026-05-15','2028-05-15','Win-Medicare'),(10,'ORS Powder','ORS772','Medicines',500,100,'Sachets','2026-06-10','2028-06-10','FDC Limited'),(11,'Surgical Mask 3-Ply','MSK-3P','Consumables',3000,500,'Pcs','2026-06-05','2031-06-05','CareGlove Inc'),(12,'Syringe with Needle 5ml','SYR-5ML','Consumables',1800,300,'Pcs','2026-05-25','2031-05-25','Hindustan Syringes');
 /*!40000 ALTER TABLE `inventory` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -177,6 +177,35 @@ LOCK TABLES `waste_logs` WRITE;
 /*!40000 ALTER TABLE `waste_logs` DISABLE KEYS */;
 /*!40000 ALTER TABLE `waste_logs` ENABLE KEYS */;
 UNLOCK TABLES;
+--
+-- Table structure for table `stock_orders`
+--
+
+DROP TABLE IF EXISTS `stock_orders`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `stock_orders` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `item_name` varchar(100) NOT NULL,
+  `qty` int(11) NOT NULL,
+  `unit` varchar(20) NOT NULL,
+  `supplier_name` varchar(100) NOT NULL,
+  `order_date` date NOT NULL,
+  `status` enum('Pending','Received') DEFAULT 'Pending',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `stock_orders`
+--
+
+LOCK TABLES `stock_orders` WRITE;
+/*!40000 ALTER TABLE `stock_orders` DISABLE KEYS */;
+INSERT INTO `stock_orders` VALUES (1,'Crocin 650mg',500,'Tablets','GlaxoSmithKline','2026-06-18','Pending'),(2,'Surgical Gloves (M)',100,'Pairs','CareGlove Inc','2026-06-19','Pending'),(3,'Amoxicillin 250mg',300,'Capsules','HealthMed Ltd','2026-06-15','Received');
+/*!40000 ALTER TABLE `stock_orders` ENABLE KEYS */;
+UNLOCK TABLES;
+
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
